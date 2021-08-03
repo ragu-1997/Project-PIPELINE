@@ -144,6 +144,7 @@
 			<artifactId>atu-reports</artifactId>
 			<version>5.5_BETA</version>
 			<scope>system</scope>
+			<systemPath>W:\Fazil\Jars\ATUTestRecorder_2.1.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
