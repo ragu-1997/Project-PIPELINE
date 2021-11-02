@@ -1,0 +1,78 @@
+---
+
+- name: set journald SystemMaxUse
+  replace:
+    dest: /etc/systemd/journald.conf
+    regexp: '^#?SystemMaxUse.+'
+    replace: 'SystemMaxUse=50M'
+  tags:
+    - bootstrap
+    - journald
+  notify:
+    - restart journald
+
+- name: set journald RuntimeMaxUse
+  replace:
+    dest: /etc/systemd/journald.conf
+    regexp: '^#?RuntimeMaxUse.+'
+    replace: 'RuntimeMaxUse=50M'
+  tags:
+    - bootstrap
+    - journald
+  notify:
+    - restart journald
+
+- name: set journald MaxLevelStore
+  replace:
+    dest: /etc/systemd/journald.conf
+    regexp: '^#?MaxLevelStore.+'
+    replace: '#MaxLevelStore=warning'
+  tags:
+    - bootstrap
+    - journald
+  notify:
+    - restart journald
+
+- name: set journald MaxLevelSyslog
+  replace:
+    dest: /etc/systemd/journald.conf
+    regexp: '^#?MaxLevelSyslog.+'
+    replace: 'MaxLevelSyslog=warning'
+  tags:
+    - bootstrap
+    - journald
+  notify:
+    - restart journald
+
+- name: set journald MaxLevelKMsg
+  replace:
+    dest: /etc/systemd/journald.conf
+    regexp: '^#?MaxLevelKMsg.+'
+    replace: 'MaxLevelKMsg=warning'
+  tags:
+    - bootstrap
+    - journald
+  notify:
+    - restart journald
+
+- name: set journald MaxLevelConsole
+  replace:
+    dest: /etc/systemd/journald.conf
+    regexp: '^#?MaxLevelConsole.+'
+    replace: '#MaxLevelConsole=warning'
+  tags:
+    - bootstrap
+    - journald
+  notify:
+    - restart journald
+
+- name: set journald Storage
+  replace:
+    dest: /etc/systemd/journald.conf
+    regexp: '^#?Storage.+'
+    replace: 'Storage=persistent'
+  tags:
+    - bootstrap
+    - journald
+  notify:
+    - restart journald

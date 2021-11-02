@@ -1,0 +1,80 @@
+---
+- hosts: tag_Service_resource
+  vars:
+    jangl_accounts_docker_image: "docker.jangl.com/jangl-accounts:{{ jangl_accounts_version | default('latest') }}"
+    jangl_accounts_default_site_url: "https://www.jangl.{{ jangl_base_domain }}"
+    jangl_accounts_db_fixtures: |
+      #!/usr/bin/env python
+      import os
+      os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'jangl_accounts.settings')
+      import django
+      django.setup()
+      from jangl_accounts.accounts.models import User
+      from jangl_accounts.sites.models import Site
+      from jangl_accounts.buyers.models import Buyer
+      from jangl_accounts.vendors.models import Vendor
+      USER = os.environ.get('JANGL_CREDENTIALS_USER', 'jangl@jangl.com')
+      SUPER_USER = os.environ.get('JANGL_CREDENTIALS_SUPER_USER', 'superuser@jangl.com')
+      PASSWORD = os.environ.get('JANGL_CREDENTIALS_PASSWORD', 'jangl')
+      FIRST_NAME = os.environ.get('JANGL_CREDENTIALS_FIRST_NAME', 'John')
+      LAST_NAME = os.environ.get('JANGL_CREDENTIALS_LAST_NAME', 'Doe')
+      SITE_URL = os.environ.get('JANGL_CREDENTIALS_SITE_URL', '{{ jangl_accounts_default_site_url }}')
+      SITE_ID = int(os.environ.get('JANGL_CREDENTIALS_SITE_ID', '1000000'))
+      BUYER_ID = int(os.environ.get('JANGL_CREDENTIALS_BUYER_ID', '2000000'))
+      VENDOR_ID = int(os.environ.get('JANGL_CREDENTIALS_VENDOR_ID', '3000000'))
+      superuser = User.objects.filter(email=SUPER_USER).first()
+      if superuser is None:
+          superuser = User.objects.create_superuser(SUPER_USER, PASSWORD)
+      print(superuser)
+      site, _ = Site.objects.get_or_create(id=SITE_ID, defaults={
+          'name': 'Test Site A',
+          'url': SITE_URL,
+          'email': USER,
+          'password': PASSWORD,
+          'first_name': FIRST_NAME,
+          'last_name': LAST_NAME,
+          'timezone': 'US/Eastern',
+      })
+      print(site)
+      buyer, _ = Buyer.objects.get_or_create(id=BUYER_ID, defaults={
+          'site_id': SITE_ID,
+          'company': 'Test Buyer',
+          'phone': '5552345678',
+          'zip_code': '10001',
+          'bill_later': True,
+          'email': USER,
+          'password': PASSWORD,
+          'first_name': FIRST_NAME,
+          'last_name': LAST_NAME,
+      })
+      print(buyer)
+      vendor, _ = Vendor.objects.get_or_create(id=VENDOR_ID, defaults={
+          'site_id': SITE_ID,
+          'name': 'Test Vendor',
+          'email': USER,
+          'password': PASSWORD,
+          'first_name': FIRST_NAME,
+          'last_name': LAST_NAME,
+          'phone': '',
+          'address': '',
+          'city': '',
+          'state': '',
+          'zip_code': '',
+      })
+      print(vendor)
+  tasks:
+    - name: Install Dev DB Fixtures
+      run_once: true
+      docker_container:
+        name: "jangl-accounts-fixtures"
+        image: "{{ jangl_accounts_docker_image }}"
+        command: |
+          sh -c 'echo "$DB_FIXTURES" > db_fixtures.py && python db_fixtures.py'
+        env: "{{ deploy.jangl_accounts.env | combine({'HOST': ec2_private_ip_address, 'DB_FIXTURES': jangl_accounts_db_fixtures }) }}"
+        state: started
+        detach: False
+        cleanup: True
+      register: fixtures_result
+    - name: Display fixtures results
+      run_once: true
+      debug: msg="{{ fixtures_result.ansible_facts.docker_container.Output }}"

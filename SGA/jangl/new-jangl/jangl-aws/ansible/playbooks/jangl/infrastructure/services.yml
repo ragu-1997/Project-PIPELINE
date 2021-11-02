@@ -1,0 +1,64 @@
+---
+- hosts: tag_Service_resource
+  roles:
+    - marathon_deploy
+  vars:
+    kafka_broker_zookeeper_url: "{{ kafka_broker_zookeeper_connect | default('kafka-zk.service.consul') }}:2181{{ kafka_broker_zookeeper_chroot | default('') }}"
+
+    marathon_apps:
+      - app:
+          id: mesos-consul
+          instances: 1
+          cpus: 0.1
+          mem: 256
+          container:
+            type: "DOCKER"
+            docker:
+              image: "ciscocloud/mesos-consul:v0.4.0"
+              network: "BRIDGE"
+              forcePullImage: true
+              portMappings:
+                - {containerPort: 0, hostPort: 0, protocol: 'tcp'}
+          args:
+            - "--zk=zk://zookeeper.service.consul:2181/mesos"
+            - "--mesos-ip-order=mesos,host"
+            - "--refresh=7s"
+
+      - app:
+          id: kafka-schema
+          instances: 1
+          cpus: 0.25
+          mem: 256
+          container:
+            type: "DOCKER"
+            docker:
+              image: "docker.jangl.com/cp-schema-registry:5.0.0"
+              network: "BRIDGE"
+              forcePullImage: true
+              portMappings:
+                - {containerPort: 0, hostPort: 0, protocol: 'tcp'}
+          env:
+            SCHEMA_REGISTRY_KAFKASTORE_TOPIC: "_kafka_schemas"
+            SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: "{{ kafka_broker_zookeeper_url }}"
+          fetch:
+            - uri: "file:///etc/docker.tar.gz"
+          labels:
+            tags: "backend,http"
+
+      - app:
+          id: kafka-manager
+          instances: 1
+          cpus: 0.3
+          mem: 1024
+          container:
+            type: "DOCKER"
+            docker:
+              image: "docker.jangl.com/kafka-manager:1.3.3.16"
+              network: "BRIDGE"
+              forcePullImage: true
+              portMappings:
+                - {containerPort: 9000, hostPort: 9000, protocol: 'tcp'}
+          env:
+            ZK_HOSTS: "{{ kafka_broker_zookeeper_url }}"
+          fetch:
+            - uri: "file:///etc/docker.tar.gz"

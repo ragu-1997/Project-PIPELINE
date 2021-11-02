@@ -1,0 +1,8 @@
+{
+  "check": {
+    "name": "docker",
+    "args": ["/usr/bin/docker", "ps", "-lq"],
+    "interval": "30s",
+    "timeout": "2s"
+  }
+}

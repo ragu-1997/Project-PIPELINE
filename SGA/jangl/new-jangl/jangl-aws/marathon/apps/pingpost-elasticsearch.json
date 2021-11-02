@@ -1,0 +1,1315 @@
+{
+    "id": "/elasticsearch/pingpost",
+    "apps": [{
+        "id": "/elasticsearch/pingpost/kibana",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/kibana/kibana-oss:6.2.2",
+            "network": "HOST",
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-kibana:/usr/share/kibana/data"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "ELASTICSEARCH_URL": "http://master.pingpost-elasticsearch.service.consul:9200"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-kibana",
+            "tags": "external,http,protected"
+        },
+        "ports": [5601],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/master-1",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "HOST",
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-master-1:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "9200",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "9300",
+            "node.name": "pingpost-master-1",
+            "node.master": "true",
+            "node.data": "false",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "master"
+        },
+        "ports": [9200, 9300],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/master-2",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "HOST",
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-master-2:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "9200",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "9300",
+            "node.name": "pingpost-master-2",
+            "node.master": "true",
+            "node.data": "false",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "master"
+        },
+        "ports": [9200, 9300],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/master-3",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "HOST",
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-master-3:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "9200",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "9300",
+            "node.name": "pingpost-master-3",
+            "node.master": "true",
+            "node.data": "false",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "master"
+        },
+        "ports": [9200, 9300],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/ingest-1",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "HOST",
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-ingest-1:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "9200",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "9300",
+            "node.name": "pingpost-ingest-1",
+            "node.master": "false",
+            "node.data": "false",
+            "node.ingest": "true",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "ingest"
+        },
+        "ports": [9200, 9300],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/ingest-2",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "HOST",
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-ingest-2:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "9200",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "9300",
+            "node.name": "pingpost-ingest-2",
+            "node.master": "false",
+            "node.data": "false",
+            "node.ingest": "true",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "ingest"
+        },
+        "ports": [9200, 9300],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/ingest-3",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "HOST",
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-ingest-3:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "9200",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "9300",
+            "node.name": "pingpost-ingest-3",
+            "node.master": "false",
+            "node.data": "false",
+            "node.ingest": "true",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "ingest"
+        },
+        "ports": [9200, 9300],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-01",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-01:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-01",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-02",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-02:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-02",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-03",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-03:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-03",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-04",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-04:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-04",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-05",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-05:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-05",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-06",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-06:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-06",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-07",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-07:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-07",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-08",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-08:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-08",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-09",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-09:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-09",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-10",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-10:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-10",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-11",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-11:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-11",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-12",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-12:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-12",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-13",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-13:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-13",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-14",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-14:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-14",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }, {
+        "id": "/elasticsearch/pingpost/data-15",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 2048,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2",
+            "network": "BRIDGE",
+            "portMappings": [
+                {"containerPort": 9200, "hostPort": 0, "protocol": "tcp"},
+                {"containerPort": 9300, "hostPort": 0, "protocol": "tcp"}
+            ],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "es-pingpost-data-15:/usr/share/elasticsearch/data"
+            }, {
+                "key": "ulimit",
+                "value": "memlock=-1:-1"
+            }]
+          }
+        },
+        "env": {
+            "ES_JAVA_OPTS": "-Xms1g -Xmx1g",
+            "TAKE_FILE_OWNERSHIP": "1",
+            "bootstrap.memory_lock": "true",
+            "cluster.name": "pingpost-es",
+            "network.publish_host": "${HOST}",
+            "http.port": "9200",
+            "http.publish_port": "${PORT0}",
+            "transport.tcp.port": "9300",
+            "transport.publish_port": "${PORT1}",
+            "node.name": "pingpost-data-15",
+            "node.master": "false",
+            "node.data": "true",
+            "node.ingest": "false",
+            "search.remote.connect": "false",
+            "discovery.zen.ping.unicast.hosts": "master.pingpost-elasticsearch.service.consul",
+            "discovery.zen.minimum_master_nodes": "2"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true",
+            "overrideTaskName": "pingpost-elasticsearch",
+            "tags": "data"
+        },
+        "healthChecks": [{
+            "protocol": "MESOS_HTTP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }]
+}

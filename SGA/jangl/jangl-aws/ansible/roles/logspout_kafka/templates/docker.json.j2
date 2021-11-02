@@ -1,0 +1,8 @@
+{
+  "adapter": "kafka_avro",
+  "filter_sources": ["stdout" ,"stderr"],
+  "address": "{{kafka_hosts}}/{{kafka_topic}}",
+  "options": {
+    "schema_registry_url": "{{schema_registry_url}}"
+  }
+}

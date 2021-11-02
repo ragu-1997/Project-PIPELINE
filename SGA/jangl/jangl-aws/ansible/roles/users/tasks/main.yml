@@ -1,0 +1,86 @@
+---
+
+- name: ensure sudoers file
+  file:
+    state: file
+    dest: /etc/sudoers.d/90-cloud-init-users
+    owner: root
+    group: root
+    mode: 0400
+  tags:
+    - users
+
+- name: Ensure group "docker" exists
+  group:
+    name: docker
+    state: present
+
+- name: create os users
+  user:
+    name: "{{ item.name }}"
+    groups: wheel, docker
+  when: item.enabled is defined and item.enabled|bool
+  loop: "{{ users|flatten(levels=1) }}"
+  tags:
+    - users
+
+- name: add users to sudoers
+  lineinfile:
+    dest: /etc/sudoers.d/90-cloud-init-users
+    insertafter: EOF
+    regexp: "^{{ item.name }} .*"
+    line: "{{ item.name }} ALL=(ALL) NOPASSWD:ALL"
+    state: present
+  when: item.enabled is defined and item.enabled|bool
+  loop: "{{ users|flatten(levels=1) }}"
+  tags:
+    - users
+
+- name: set ssh key for users
+  authorized_key: "user={{ item.0.name }} key='{{ item.1 }}'"
+  when: item.1 is defined and item.0.enabled|bool
+  loop: "{{ users|subelements('public_keys') }}"
+  tags:
+    - users
+
+- name: set users list
+  set_fact:
+    users_list: "{{
+      users
+      | selectattr('enabled', 'defined')
+      | selectattr('enabled', 'equalto', True)
+      | map(attribute='name')
+      | join(' ')
+    }}"
+
+- name: limit users with ssh access
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    insertafter: EOF
+    regexp: "^AllowUsers.*"
+    line: "AllowUsers {{ users_list }}"
+    state: present
+  notify:
+    - restart ssh
+  tags:
+    - users
+
+- name: remove users from sudoers
+  lineinfile:
+    dest: /etc/sudoers.d/90-cloud-init-users
+    regexp: "^{{ item.name }} .*"
+    state: absent
+  when: item.enabled is defined and not item.enabled|bool
+  loop: "{{ users|flatten(levels=1) }}"
+  tags:
+    - users
+
+- name: delete os users
+  user:
+    name: "{{ item.name }}"
+    state: absent
+    remove: yes
+  when: item.enabled is defined and not item.enabled|bool
+  loop: "{{ users|flatten(levels=1) }}"
+  tags:
+    - users

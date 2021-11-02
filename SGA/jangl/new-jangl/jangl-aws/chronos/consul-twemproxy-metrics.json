@@ -1,0 +1,21 @@
+{
+  "name": "consul-twemproxy-metrics",
+  "schedule": "R/2018-01-01T00:00:00Z/PT1M",
+  "epsilon": "PT1M",
+  "cpus": 0.3,
+  "disk": 256,
+  "mem": 1024,
+  "container": {
+    "type": "docker",
+    "image": "docker.jangl.com/consul-twemproxy-metrics",
+    "forcePullImage": true
+  },
+  "shell": true,
+  "command": "consul-twemproxy-metrics influxdb://influxdb.service.consul:8086/twemproxy accounts-cache-twemproxy calls-cache-twemproxy frontend-cache-twemproxy geo-cache-twemproxy inbound-rates-twemproxy prefs-twemproxy reports-cache-twemproxy webleads-backend-twemproxy webleads-cache-twemproxy webleads-ping-dupes-twemproxy",
+  "executor": "",
+  "executorFlags": "",
+  "retries": 1,
+  "owner": "",
+  "async": false,
+  "environmentVariables": []
+}

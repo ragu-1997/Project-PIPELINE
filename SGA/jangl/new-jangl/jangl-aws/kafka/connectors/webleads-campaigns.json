@@ -1,0 +1,14 @@
+{
+  "name": "jangl-webleads-campaigns-source",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "tasks.max": "5",
+    "connection.url": "jdbc:postgresql://postgres-webleads-new2.cewygxfcbvsc.us-east-1.rds.amazonaws.com:5432/jangl_webleads?user=jangl_webleads&password=GD5Qj2q74LoX&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory",
+    "table.whitelist": "buyers_buyercampaign,vendors_vendorcampaign,verticals_vertical",
+    "mode": "timestamp+incrementing",
+    "timestamp.column.name": "modified",
+    "incrementing.column.name": "id",
+    "batch.max.rows": "100",
+    "topic.prefix": "jangl.webleads.db."
+  }
+}

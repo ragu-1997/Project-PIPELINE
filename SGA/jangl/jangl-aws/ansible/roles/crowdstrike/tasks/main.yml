@@ -1,0 +1,22 @@
+---
+- name: Copy crowdstrike installer
+  copy:
+    src: "{{ crowdstrike_yum_file }}"
+    dest: "/opt/{{ crowdstrike_yum_file }}"
+  tags: ["crowdstrike"]
+  when: enable_crowdstrike
+
+- name: Install crowdstrike package
+  yum: name="/opt/{{ crowdstrike_yum_file }}" state=present
+  tags: ["crowdstrike"]
+  when: enable_crowdstrike
+
+- name: Setup crowdstrike settings
+  command: /opt/CrowdStrike/falconctl -s -f --cid="{{ crowdstrike_settings_cid }}"
+  tags: ["crowdstrike"]
+  when: enable_crowdstrike
+
+- name: Enable crowdstrike service
+  service: name=falcon-sensor state=started enabled=yes
+  tags: ["crowdstrike"]
+  when: enable_crowdstrike

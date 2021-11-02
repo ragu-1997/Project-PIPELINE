@@ -1,0 +1,12 @@
+# production
+access_key = "AKIAJFQX2MZ7HVSD4A3A"
+secret_key = "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"
+ami = "ami-02eac2c0129f6376b"
+exhibitor_bucket_name = "exhibitor-new2"
+controller_server_count = "5"
+edge_server_count = "6"
+kafka_zk_server_count = "3"
+kafka_server_count = "6"
+kafka_connect_server_count = "3"
+resource_server_count = "80"
+vpn_server_count = "1"

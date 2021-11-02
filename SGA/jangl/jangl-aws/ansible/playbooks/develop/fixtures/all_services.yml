@@ -1,0 +1,174 @@
+---
+- hosts: tag_Service_resource
+  vars:
+    backend_api_url: "http://{{ ec2_private_ip_address }}:8008"
+    jangl_accounts_docker_image: "docker.jangl.com/jangl-accounts:{{ jangl_accounts_version | default('latest') }}"
+    jangl_accounts_default_credentials_user: "jangl@jangl.com"
+    jangl_accounts_default_credentials_superuser: "superuser@jangl.com"
+    jangl_accounts_default_credentials_password: "jangl"
+    jangl_accounts_default_first_name: "John"
+    jangl_accounts_default_last_name: "Doe"
+    jangl_accounts_default_site_url: "https://www.jangl.{{ jangl_base_domain }}"
+    jangl_accounts_default_site_id: 1000000
+    jangl_accounts_default_buyer_id: 2000000
+    jangl_accounts_default_vendor_id: 3000000
+    jangl_accounts_db_fixtures: |
+      #!/usr/bin/env python
+      import os
+      os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'jangl_accounts.settings')
+      import django
+      django.setup()
+      from jangl_accounts.accounts.models import User
+      from jangl_accounts.sites.models import Site
+      from jangl_accounts.buyers.models import Buyer
+      from jangl_accounts.vendors.models import Vendor
+      USER = os.environ.get('JANGL_CREDENTIALS_USER', '{{ jangl_accounts_default_credentials_user }}')
+      SUPER_USER = os.environ.get('JANGL_CREDENTIALS_SUPER_USER', '{{ jangl_accounts_default_credentials_superuser }}')
+      PASSWORD = os.environ.get('JANGL_CREDENTIALS_PASSWORD', '{{ jangl_accounts_default_credentials_password }}')
+      FIRST_NAME = os.environ.get('JANGL_CREDENTIALS_FIRST_NAME', '{{ jangl_accounts_default_first_name }}')
+      LAST_NAME = os.environ.get('JANGL_CREDENTIALS_LAST_NAME', '{{ jangl_accounts_default_last_name }}')
+      SITE_URL = os.environ.get('JANGL_CREDENTIALS_SITE_URL', '{{ jangl_accounts_default_site_url }}')
+      SITE_ID = int(os.environ.get('JANGL_CREDENTIALS_SITE_ID', '{{ jangl_accounts_default_site_id }}'))
+      superuser = User.objects.filter(email=SUPER_USER).first()
+      if superuser is None:
+          superuser = User.objects.create_superuser(SUPER_USER, PASSWORD)
+      print(superuser)
+      site, _ = Site.objects.get_or_create(id=SITE_ID, defaults={
+          'name': 'Test Site A',
+          'url': SITE_URL,
+          'email': USER,
+          'password': PASSWORD,
+          'first_name': FIRST_NAME,
+          'last_name': LAST_NAME,
+          'timezone': 'US/Eastern',
+      })
+      print(site)
+
+  tasks:
+    - name: Install Dev DB Fixtures
+      run_once: true
+      docker_container:
+        name: "jangl-accounts-fixtures"
+        image: "{{ jangl_accounts_docker_image }}"
+        command: |
+          sh -c 'echo "$DB_FIXTURES" > db_fixtures.py && python db_fixtures.py'
+        env: "{{ deploy.jangl_accounts.env | combine({'HOST': ec2_private_ip_address, 'DB_FIXTURES': jangl_accounts_db_fixtures }) }}"
+        state: started
+        detach: False
+        cleanup: True
+      register: fixtures_result
+    - name: Display fixtures results
+      run_once: true
+      debug: msg="{{ fixtures_result.ansible_facts.docker_container.Output }}"
+    - name: Login as staff user
+      run_once: true
+      uri:
+        url: "{{ backend_api_url }}/accounts/sites/{{ jangl_accounts_default_site_id }}/get_user_token/"
+        return_content: true
+      register: staff_login_result
+    - name: Set staff auth headers
+      run_once: true
+      set_fact:
+        staff_auth_headers:
+          Authorization: "JWT {{ staff_login_result.json.token }}"
+          X-Site-ID: "{{ jangl_accounts_default_site_id }}"
+    - name: Check buyer exists
+      run_once: true
+      uri:
+        url: "{{ backend_api_url }}/accounts/buyers/{{ jangl_accounts_default_buyer_id }}/"
+        status_code: [200, 404]
+        headers: "{{ staff_auth_headers }}"
+      register: buyer_exists_result
+    - name: Create buyer
+      run_once: true
+      uri:
+        url: "{{ backend_api_url }}/accounts/buyers/"
+        method: "POST"
+        headers: "{{ staff_auth_headers }}"
+        body_format: "json"
+        body:
+          email: "{{ jangl_accounts_default_credentials_user }}"
+          first_name: "{{ jangl_accounts_default_first_name }}"
+          last_name: "{{ jangl_accounts_default_last_name }}"
+          company: "Test Buyer"
+          phone: "5552345678"
+          zip_code": "10601"
+          bill_later: true
+      when: buyer_exists_result.status == 404
+    - name: Check vendor exists
+      run_once: true
+      uri:
+        url: "{{ backend_api_url }}/accounts/vendors/{{ jangl_accounts_default_vendor_id }}/"
+        status_code: [200, 404]
+        headers: "{{ staff_auth_headers }}"
+      register: vendor_exists_result
+    - name: Create vendor
+      run_once: true
+      uri:
+        url: "{{ backend_api_url }}/accounts/vendors/"
+        method: "POST"
+        headers: "{{ staff_auth_headers }}"
+        body_format: "json"
+        body:
+          email: "{{ jangl_accounts_default_credentials_user }}"
+          first_name: "{{ jangl_accounts_default_first_name }}"
+          last_name: "{{ jangl_accounts_default_last_name }}"
+          name: "Test Vendor"
+      when: vendor_exists_result.status == 404
+    - name: Update site permissions
+      run_once: true
+      uri:
+        url: "{{ backend_api_url }}/prefs/platform/permissions/?site={{ jangl_accounts_default_site_id }}"
+        method: "PUT"
+        headers: "{{ staff_auth_headers }}"
+        body_format: "json"
+        body:
+          allowed:
+            - "can_use_leads"
+            - "can_use_ping_post"
+            - "can_use_retail"
+            - "can_use_calls"
+            - "can_use_calls_ping_post"
+            - "can_use_tech_requests"
+            - "can_use_lead_verification"
+            - "can_register_from_home_page"
+          blocked: []
+    - name: Update buyers permissions
+      run_once: true
+      uri:
+        url: "{{ backend_api_url }}/prefs/buyers/permissions/?site={{ jangl_accounts_default_site_id }}"
+        method: "PUT"
+        headers: "{{ staff_auth_headers }}"
+        body_format: "json"
+        body:
+          allowed:
+            - "can_access_calls"
+            - "can_access_leads"
+            - "can_access_billing"
+            - "can_add_weblead_campaign"
+            - "can_enable_disable_weblead_campaign"
+            - "can_edit_weblead_campaign"
+            - "can_end_weblead_campaign"
+            - "can_use_lead_verification"
+            - "can_return_webleads"
+            - "can_view_weblead_delivery_details"
+            - "can_add_call_campaign"
+            - "can_enable_disable_call_campaign"
+            - "can_edit_call_campaign"
+            - "can_end_call_campaign"
+            - "can_listen_to_recordings"
+            - "can_view_call_contact"
+            - "can_view_inbound_caller_id"
+          blocked: []
+    - name: Update vendors permissions
+      run_once: true
+      uri:
+        url: "{{ backend_api_url }}/prefs/vendors/permissions/?site={{ jangl_accounts_default_site_id }}"
+        method: "PUT"
+        headers: "{{ staff_auth_headers }}"
+        body_format: "json"
+        body:
+          allowed:
+            - "can_access_vendor_reporting"
+            - "can_access_vendor_returns"
+          blocked: []	  

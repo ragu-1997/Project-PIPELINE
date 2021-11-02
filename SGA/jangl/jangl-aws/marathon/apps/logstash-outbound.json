@@ -1,0 +1,14 @@
+{
+  "id": "logstash/outbound-ping-post",
+  "cmd": "sh -c \"logstash -e \\\"input { kafka { group_id => \\\\\\\"logstash-outbound-ping-post\\\\\\\" client_id => \\\\\\\"logstash-outbound-ping-post\\\\\\\" bootstrap_servers => \\\\\\\"kafka.service.consul:9092\\\\\\\" topics => [\\\\\\\"jangl.webleads.outbound_ping_post\\\\\\\"] decorate_events => true consumer_threads => 12 auto_offset_reset => \\\\\\\"earliest\\\\\\\" type => \\\\\\\"outbound\\\\\\\" codec => avro_schema_registry { endpoint => \\\\\\\"http://$HOST:8081\\\\\\\" } value_deserializer_class => \\\\\\\"org.apache.kafka.common.serialization.ByteArrayDeserializer\\\\\\\" } } filter { ruby { code => \\\\\\\"event.set('duration', event.get('response_timestamp') - event.get('request_timestamp'))\\\\\\\" } date { match => [ \\\\\\\"request_timestamp\\\\\\\", \\\\\\\"UNIX\\\\\\\" ] } date { match => [ \\\\\\\"request_timestamp\\\\\\\", \\\\\\\"UNIX\\\\\\\" ] target => \\\\\\\"request_timestamp\\\\\\\" } date { match => [ \\\\\\\"response_timestamp\\\\\\\", \\\\\\\"UNIX\\\\\\\" ] target => \\\\\\\"response_timestamp\\\\\\\" } mutate { convert => { \\\\\\\"result.sell_price\\\\\\\" => \\\\\\\"float\\\\\\\" } } } output { elasticsearch { hosts => [\\\\\\\"http://ingest.pingpost-elasticsearch.service.consul:9200\\\\\\\"] } }\\\" -w 12 -b 200\"",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "docker.jangl.com/kafka-logstash:6.2.2",
+      "forcePullImage": true
+    }
+  },
+  "instances": 1,
+  "cpus": 1,
+  "mem": 4096
+}

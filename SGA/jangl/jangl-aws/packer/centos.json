@@ -1,0 +1,33 @@
+{
+  "variables": {
+    "aws_access_key": "{{env `AWS_ACCESS_KEY_ID`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_ACCESS_KEY`}}",
+    "subnet_id": "subnet-7f426f27",
+    "vpc_id": "vpc-d1cddeb4"
+  },
+  "builders": [{
+    "type": "amazon-ebs",
+    "access_key": "{{user `aws_access_key`}}",
+    "secret_key": "{{user `aws_secret_key`}}",
+    "region": "us-east-1",
+    "source_ami": "ami-9887c6e7",
+    "instance_type": "m4.2xlarge",
+    "subnet_id": "{{user `subnet_id`}}",
+    "vpc_id": "{{user `vpc_id`}}",
+    "ssh_username": "centos",
+    "ssh_pty": true,
+    "ami_name": "centos {{timestamp}}",
+    "tags": {
+      "Version": "4"
+    },
+    "run_tags": {
+      "Version": "4",
+      "Service": "packer"
+    }
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E '{{ .Path }}'",
+    "scripts": ["install.sh", "clean.sh"]
+  }]
+}

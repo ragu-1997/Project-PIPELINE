@@ -1,0 +1,28 @@
+# file: roles/install-pgbouncer/tasks/post-install.yml
+
+- name: register pgbouncer with consul
+  become: yes
+  copy:
+    src: pgbouncer-service.json
+    dest: /etc/consul
+    owner: root
+    group: root
+  notify:
+    - reload consul
+  tags: ["consul"]
+
+- name: "add logrotate configuration"
+  become: yes
+  template:
+    src: pgbouncer.j2
+    dest: /etc/logrotate.d/pgbouncer
+    owner: root
+    group: root
+    mode: 0644
+  when: enable_logrotate
+
+- name: "reload logrotate"
+  become: yes
+  command: logrotate -s /var/lib/logrotate.status /etc/logrotate.conf
+  when: enable_logrotate
+  ignore_errors: yes

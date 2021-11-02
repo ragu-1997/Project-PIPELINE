@@ -1,0 +1,46 @@
+{
+  "id": "/drone/runner",
+  "cpus": 2,
+  "mem": 4096,
+  "instances": 2,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "forcePullImage": true,
+      "image": "drone/drone-runner-docker:1",
+      "parameters": [],
+      "privileged": false
+    },
+    "portMappings": [
+      {
+        "containerPort": 13000,
+        "hostPort": 13000,
+        "protocol": "tcp"
+      }
+    ],
+    "volumes": [
+      {
+        "containerPath": "/var/run/docker.sock",
+        "hostPath": "/var/run/docker.sock",
+        "mode": "RO"
+      }
+    ]
+  },
+  "requirePorts" : true,
+  "env": {
+    "DRONE_HTTP_BIND": ":13000",
+    "DRONE_RPC_PROTO": "https",
+    "DRONE_RPC_HOST": "drone.jan.gl",
+    "DRONE_RPC_SECRET": "e1ed07ef07ceb06dae29e9ddd3302dd6",
+    "DRONE_RUNNER_CAPACITY": "2",
+    "DRONE_RUNNER_MAX_PROCS": "2",
+    "DRONE_UI_USERNAME": "jangl",
+    "DRONE_UI_PASSWORD": "r3vp01nt"
+  },
+  "healthChecks": [],
+  "networks": [
+    {
+      "mode": "container/bridge"
+    }
+  ]
+}

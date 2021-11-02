@@ -1,0 +1,17 @@
+---
+
+- name: leave consul
+  command: consul leave
+  tags: ["consul"]
+- name: stop consul
+  service: name=consul enabled=no state=stopped
+  tags: ["consul"]
+- name: remove consul
+  yum: name=consul state=absent
+  tags: ["consul"]
+- name: remove data dir
+  file: path=/var/lib/consul state=absent
+  tags: ["consul"]
+- name: remove config dir
+  file: path=/etc/consul state=absent
+  tags: ["consul"]

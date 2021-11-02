@@ -1,0 +1,14 @@
+{
+  "id": "logstash/calls-qualifiers",
+  "cmd": "sh -c \"logstash -e 'input { kafka { group_id => \\\"logstash-calls-qualifers\\\" client_id => \\\"logstash-calls-qualifiers\\\" bootstrap_servers => \\\"kafka.service.consul:9092\\\" topics => [\\\"jangl.calls.inbound_campaign_qualifiers\\\"] decorate_events => true auto_offset_reset => \\\"earliest\\\" type => \\\"qualifiers\\\" codec => avro_schema_registry { endpoint => \\\"http://$HOST:8081\\\" } value_deserializer_class => \\\"org.apache.kafka.common.serialization.ByteArrayDeserializer\\\" } } filter { date { match => [ \\\"timestamp\\\", \\\"UNIX\\\" ] } } output { elasticsearch { hosts => [\\\"http://ingest.calls-elasticsearch.service.consul:9200\\\"] } }'\"",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "docker.jangl.com/kafka-logstash:6.2.2",
+      "forcePullImage": true
+    }
+  },
+  "instances": 1,
+  "cpus": 0.75,
+  "mem": 2048
+}

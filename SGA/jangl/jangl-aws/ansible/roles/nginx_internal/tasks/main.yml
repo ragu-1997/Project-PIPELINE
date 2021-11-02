@@ -1,0 +1,11 @@
+---
+
+- name: copy nginx configuration
+  become: yes
+  copy:
+    src: internal.nginx
+    dest: /etc/nginx/templates
+  notify:
+    - reload nginx-consul
+  tags:
+    - nginx_internal

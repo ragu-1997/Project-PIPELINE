@@ -1,0 +1,20 @@
+---
+- name: deploy nginx metrics service
+  template:
+   src: "nginx-metrics.service.j2"
+   dest: "/usr/lib/systemd/system/{{nginx_metrics_service_name}}.service"
+  notify:
+    - reload systemd
+    - restart nginx_metrics
+  tags:
+    - nginx_metrics
+
+- meta: flush_handlers
+
+- name: enable nginx metrics
+  service:
+    name: "{{nginx_metrics_service_name}}"
+    enabled: yes
+    state: started
+  tags:
+    - nginx_metrics

@@ -1,0 +1,186 @@
+  # Return 200 No Buyers Found on all API requests
+  # server {
+  #   server_name ~^api\.(.*)$;
+  #   listen 80;
+  #   log_by_lua "luameter.mark_by_host()";
+  #
+  #   location / {
+  #     content_by_lua_block {
+  #       if ngx.var.http_accept == "application/xml" then
+  #         ngx.say('<?xml version="1.0" encoding="utf-8"?><PingResponse><Status>denied</Status><Errors><Error><Field>buyers</Field><Message>No Buyers Found</Message></Error></Errors></PingResponse>')
+  #       else
+  #         ngx.say('{"status":"denied","errors":{"buyers":["No Buyers Found"]}}')
+  #       end
+  #     }
+  #   }
+  # }
+
+server {
+  listen 80 default_server;
+  return 444;
+}
+
+{{range services }}{{if or (.Tags | contains "external") (eq .Name "frontend") (eq .Name "rpm-leadgen-sites") }}
+
+  upstream {{.Name}} { {{range service .Name}}
+    server {{.Address}}:{{.Port}};{{end}}
+  }
+
+  server { {{if (.Tags | contains "external") }}
+    server_name ~^{{.Name}}\.(.*)$;
+    listen 80;
+    # log_by_lua "luameter.mark_by_host()";
+    {{else}}{{if (eq .Name "frontend") }}
+    listen 81 default_server;
+    # log_by_lua "luameter.mark('frontend')";
+    {{end}}{{if (eq .Name "rpm-leadgen-sites") }}
+    listen 82 default_server;
+    # log_by_lua "luameter.mark('sites')";
+    {{end}}{{end}}
+
+    # Block IPs
+    deny 169.50.43.242;
+
+    if ($http_x_forwarded_proto != 'https') {
+      return 301 https://$host$request_uri;
+    }
+
+    location / { {{if (.Tags | contains "big-upload") }}
+      client_max_body_size 25M;{{end}}{{if (.Tags | contains "cors") }}
+      if ($request_method = 'OPTIONS') {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        #
+        # Custom headers and headers various browsers *should* be OK with but aren't
+        #
+        add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';
+        #
+        # Tell client that this pre-flight info is valid for 20 days
+        #
+        add_header 'Access-Control-Max-Age' 1728000;
+        add_header 'Content-Type' 'text/plain charset=UTF-8';
+        add_header 'Content-Length' 0;
+        return 204;
+     }
+     if ($request_method = 'POST') {
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization' always;
+     }
+     if ($request_method = 'GET') {
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization' always;
+     }
+  {{end}}{{if (.Tags | contains "uwsgi") }}
+      include /etc/nginx/uwsgi_params;
+      uwsgi_param Host $host;
+      uwsgi_param X-Real-IP $remote_addr;
+      uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;
+      uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;
+      uwsgi_next_upstream error http_503;
+
+      uwsgi_pass {{.Name}};
+  {{end}}{{if (.Tags | contains "http") }}
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+      proxy_redirect off;
+      proxy_buffering off;
+      {{if (eq .Name "frontend") }}
+      proxy_read_timeout 300s;
+      proxy_send_timeout 180s;
+      {{end}}
+
+      proxy_pass http://{{.Name}};
+  {{end}}{{if (.Tags | contains "protected") }}
+      auth_basic "Restricted Content";
+      auth_basic_user_file /etc/nginx/.htpasswd;
+  {{end}}{{if (.Tags | contains "hsts") }}
+      add_header 'Strict-Transport-Security' 'max-age=63072000; includeSubDomains; preload' always;
+  {{end}}
+    }
+  }
+{{end}}{{end}}
+
+{{range services }}{{if (eq .Name "lenses") }}
+  upstream {{.Name}} { {{range service .Name}}
+    server {{.Address}}:{{.Port}};{{end}}
+  }
+
+  map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+  }
+
+  server {
+    server_name ~^{{.Name}}\.(.*)$;
+    listen 80;
+
+    # websocket paths
+    location /api/ws {
+        proxy_pass http://{{.Name}};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
+        proxy_redirect off;
+        proxy_set_header  X-Real-IP  $remote_addr;
+        proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header  Host $http_host;
+    }
+    location /api/v1/ws {
+        proxy_pass http://{{.Name}};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
+        proxy_redirect off;
+        proxy_set_header  X-Real-IP  $remote_addr;
+        proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header  Host $http_host;
+    }
+    location /api/kafka/ws {
+        proxy_pass http://{{.Name}};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+
+        proxy_redirect off;
+        proxy_set_header  X-Real-IP  $remote_addr;
+        proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header  Host $http_host;
+    }
+
+    # SSE paths
+    location /api/sse {
+        proxy_pass http://{{.Name}};
+        proxy_http_version 1.1;
+
+        proxy_buffering off;
+        proxy_redirect off;
+        proxy_set_header  X-Real-IP  $remote_addr;
+        proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header  Host $http_host;
+    }
+
+    # all other paths
+    location / {
+        proxy_pass http://{{.Name}};
+        proxy_http_version 1.1;
+
+        proxy_redirect off;
+        proxy_set_header  X-Real-IP  $remote_addr;
+        proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header  Host $http_host;
+    }
+  }
+{{end}}{{end}}
+
+
+server {
+  server_name help.jangl.com;
+  listen 81;
+  return 301 https://jangl.atlassian.net/servicedesk/customer/portal;
+}

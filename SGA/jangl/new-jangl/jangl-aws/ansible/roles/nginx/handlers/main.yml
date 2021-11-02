@@ -1,0 +1,12 @@
+---
+- name: restart nginx-consul
+  become: yes
+  service:
+    name: nginx-consul
+    state: restarted
+
+- name: reload nginx-consul
+  become: yes
+  service:
+    name: nginx-consul
+    state: reloaded

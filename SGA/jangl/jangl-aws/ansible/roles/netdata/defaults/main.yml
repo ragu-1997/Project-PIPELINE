@@ -1,0 +1,13 @@
+---
+# defaults file for netdata
+
+netdata_kickstart_url: "https://my-netdata.io/kickstart-static64.sh"
+netdata_kickstart_path: "/tmp/kickstart-static64.sh"
+netdata_kickstart_args: "--dont-wait --dont-start-it --disable-telemetry --stable-channel"
+
+netdata_prefix: "/opt/netdata"
+netdata_conf_file: "{{netdata_prefix}}/etc/netdata/netdata.conf"
+netdata_exporting_file: "{{netdata_prefix}}/etc/netdata/exporting.conf"
+netdata_backend_db: "influxdb.service.consul:4242"
+
+netdata_cloud_url: "https://app.netdata.cloud"

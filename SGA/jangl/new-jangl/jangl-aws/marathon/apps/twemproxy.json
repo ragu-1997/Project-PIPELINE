@@ -1,0 +1,290 @@
+{
+    "id": "/twemproxy",
+    "apps": [{
+        "id": "/twemproxy/accounts-cache",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "accounts-cache"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }, {
+        "id": "/twemproxy/pingpost-qualifiers",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "pingpost-qualifiers"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }, {
+        "id": "/twemproxy/pingpost-throttle",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "pingpost-throttle"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }, {
+        "id": "/twemproxy/webleads-ping-dupes",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "webleads-ping-dupes"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }, {
+        "id": "/twemproxy/billing-cache",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "billing-cache"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }, {
+        "id": "/twemproxy/calls-cache",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "calls-cache"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }, {
+        "id": "/twemproxy/dashboard",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "dashboard"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }, {
+        "id": "/twemproxy/frontend-cache",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "frontend-cache"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }, {
+        "id": "/twemproxy/geo-cache",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "geo-cache"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }, {
+        "id": "/twemproxy/inbound-rates",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "inbound-rates"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }, {
+        "id": "/twemproxy/reports-cache",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "docker.jangl.com/twemproxy-consul",
+            "network": "HOST"
+          }
+        },
+        "env": {
+            "REDIS_PORT": "7379",
+            "REDIS_NAME": "reports-cache"
+        },
+        "ports": [7379],
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "port": 7379,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }]
+    }]
+}

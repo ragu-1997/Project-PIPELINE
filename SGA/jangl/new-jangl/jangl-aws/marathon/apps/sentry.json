@@ -1,0 +1,216 @@
+{
+    "id": "/sentry",
+    "apps": [{
+        "id": "/sentry/cache",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 1024,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "redis:3.2.9",
+            "network": "BRIDGE",
+            "portMappings": [{"containerPort": 6379, "hostPort": 6379, "protocol": "tcp"}],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "sentry-cache-redis:/data"
+            }]
+          }
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true"
+        },
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 10,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    },{
+        "id": "/sentry/db",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 1024,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "postgres:9.6",
+            "network": "BRIDGE",
+            "portMappings": [{"containerPort": 5432, "hostPort": 15432, "protocol": "tcp"}],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "sentry-postgres:/var/lib/postgresql/data"
+            }]
+          }
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true"
+        },
+        "env": {
+            "POSTGRES_USER": "jangl_sentry",
+            "POSTGRES_PASSWORD": "DUJAdjLY7uk6"
+        },
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 20,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    },{
+        "id": "/sentry/smtp",
+        "instances": 1,
+        "cpus": 0.1,
+        "mem": 256,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "tianon/exim4",
+            "network": "BRIDGE",
+            "portMappings": [{"containerPort": 25, "hostPort": 25252, "protocol": "tcp"}]
+          }
+        },
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 10,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    },{
+        "id": "/sentry/web",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 1024,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "sentry:9",
+            "network": "BRIDGE",
+            "portMappings": [{"containerPort": 9000, "protocol": "tcp"}]
+          }
+        },
+        "labels":{
+            "overrideTaskName": "sentry",
+            "tags": "external,http"
+        },
+        "env": {
+            "SENTRY_SECRET_KEY": "d-u@4*%iya%a=-3bh7(!opi#+ae!zhfke-onu#2*tk%xz+zvx2",
+            "SENTRY_POSTGRES_HOST": "db-sentry.service.consul",
+            "SENTRY_POSTGRES_PORT": "15432",
+            "SENTRY_DB_NAME": "jangl_sentry",
+            "SENTRY_DB_USER": "jangl_sentry",
+            "SENTRY_DB_PASSWORD": "DUJAdjLY7uk6",
+            "SENTRY_REDIS_HOST": "cache-sentry.service.consul",
+            "SENTRY_REDIS_PORT": "6379",
+            "SENTRY_SERVER_EMAIL": "sentry@noreply.jangl.com",
+            "SENTRY_EMAIL_HOST": "smtp.mandrillapp.com",
+            "SENTRY_EMAIL_PORT": "587",
+            "SENTRY_EMAIL_USE_TLS": "True",
+            "SENTRY_EMAIL_USER": "jangl@revpointmedia.com",
+            "SENTRY_EMAIL_PASSWORD": "g1rKfhO81P5JauTcz1W29g"
+        },
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 30,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0.5,
+            "maximumOverCapacity": 0.5
+        }
+    },{
+        "id": "/sentry/worker",
+        "args": ["run", "worker"],
+        "instances": 1,
+        "cpus": 0.5,
+        "mem": 1024,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "sentry:9"
+          }
+        },
+        "env": {
+            "SENTRY_SECRET_KEY": "d-u@4*%iya%a=-3bh7(!opi#+ae!zhfke-onu#2*tk%xz+zvx2",
+            "SENTRY_POSTGRES_HOST": "db-sentry.service.consul",
+            "SENTRY_POSTGRES_PORT": "15432",
+            "SENTRY_DB_NAME": "jangl_sentry",
+            "SENTRY_DB_USER": "jangl_sentry",
+            "SENTRY_DB_PASSWORD": "DUJAdjLY7uk6",
+            "SENTRY_REDIS_HOST": "cache-sentry.service.consul",
+            "SENTRY_REDIS_PORT": "6379",
+            "SENTRY_SERVER_EMAIL": "sentry@noreply.jangl.com",
+            "SENTRY_EMAIL_HOST": "smtp.mandrillapp.com",
+            "SENTRY_EMAIL_PORT": "587",
+            "SENTRY_EMAIL_USE_TLS": "True",
+            "SENTRY_EMAIL_USER": "jangl@revpointmedia.com",
+            "SENTRY_EMAIL_PASSWORD": "g1rKfhO81P5JauTcz1W29g"
+        },
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0.5,
+            "maximumOverCapacity": 0.5
+        }
+    },{
+        "id": "/sentry/cron",
+        "args": ["run", "cron"],
+        "instances": 1,
+        "cpus": 0.25,
+        "mem": 1024,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "sentry:9"
+          }
+        },
+        "env": {
+            "SENTRY_SECRET_KEY": "d-u@4*%iya%a=-3bh7(!opi#+ae!zhfke-onu#2*tk%xz+zvx2",
+            "SENTRY_POSTGRES_HOST": "db-sentry.service.consul",
+            "SENTRY_POSTGRES_PORT": "15432",
+            "SENTRY_DB_NAME": "jangl_sentry",
+            "SENTRY_DB_USER": "jangl_sentry",
+            "SENTRY_DB_PASSWORD": "DUJAdjLY7uk6",
+            "SENTRY_REDIS_HOST": "cache-sentry.service.consul",
+            "SENTRY_REDIS_PORT": "6379",
+            "SENTRY_SERVER_EMAIL": "no-reply@sentry.jan.gl",
+            "SENTRY_SERVER_EMAIL": "sentry@noreply.jangl.com",
+            "SENTRY_EMAIL_HOST": "smtp.mandrillapp.com",
+            "SENTRY_EMAIL_PORT": "587",
+            "SENTRY_EMAIL_USE_TLS": "True",
+            "SENTRY_EMAIL_USER": "jangl@revpointmedia.com",
+            "SENTRY_EMAIL_PASSWORD": "g1rKfhO81P5JauTcz1W29g"
+        },
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0.5,
+            "maximumOverCapacity": 0.5
+        }
+    }]
+}

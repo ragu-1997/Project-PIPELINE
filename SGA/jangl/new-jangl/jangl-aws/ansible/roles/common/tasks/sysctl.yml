@@ -1,0 +1,13 @@
+---
+
+- name: sysctl vm.min_free_kbytes
+  sysctl:
+    name: vm.min_free_kbytes
+    value: "{{ sysctl_min_free_kbytes }}"
+    state: present
+
+- name: sysctl vm.max_map_count
+  sysctl:
+    name: vm.max_map_count
+    value: "{{ sysctl_max_map_count }}"
+    state: present

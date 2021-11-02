@@ -1,0 +1,12 @@
+{
+  "id": "dummy-no-ports",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "saulshanabrook/webserver-debug:0.1"
+    }
+  },
+  "ports": [],
+  "cpus": 0.2,
+  "mem": 32.0
+}

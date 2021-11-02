@@ -1,0 +1,16 @@
+{
+  "name": "jangl-webleads-leads-source",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "tasks.max": "4",
+    "connection.url": "jdbc:postgresql://postgres-webleads.cewygxfcbvsc.us-east-1.rds.amazonaws.com:5432/jangl_webleads?user=jangl_webleads&password=A1eSQC26CesJ&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory",
+    "table.whitelist": "leads_complete",
+    "table.types": "TABLE,VIEW",
+    "mode": "timestamp",
+    "timestamp.delay.interval.ms": "60000",
+    "timestamp.column.name": "timestamp",
+    "batch.max.rows": "100",
+    "topic.prefix": "jangl.webleads.db.",
+    "validate.non.null": "false"
+  }
+}

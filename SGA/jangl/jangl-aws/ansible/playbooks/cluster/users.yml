@@ -1,0 +1,23 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    users:
+      - name: ryan
+        enabled: True
+        public_keys:
+          - "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBB+NaEAu5QH/S2883hh3FX00U0ACklGpodv1cMzcZIFSkMZ6GjXkIhANw5uiV93W7blUULggeXzoHQkTTrVqiyE= ryan@bl4ckbird-laptop.local"
+      - name: alex
+        enabled: True
+        public_keys:
+          - "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBAH8oP3nE75xV+ZwmxuhfN8CeML8OL3lKXbihsT93Hhsy77A6s8mnQM1FAttzQSsVKUi5EoGwfjTy57IsTTQUaI= alex@ALEX-LT"
+      - name: swarna
+        enabled: False
+        public_keys:
+          - "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBHYfkSHRvLbF+ohDpdrnghP+UvKYZ0P5un84aZYM1U6eCsh4G8rQljZ5+qDcgX3AcRZc10FuQ0SruUlCPemHpiQ= admin@SSTLAP069"
+      - name: manish
+        enabled: True
+        public_keys:
+          - "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIKC0rJbf4FzwzQpRVAXZkmBUZxiN3ayWUyZYi/LafNr3IWedQ5d2XLPsyljUK0/jMNo29HVnr+Cc6ftDlUL85s= admin@SSTPR230"
+  roles:
+    - users

@@ -1,0 +1,34 @@
+{
+  "id": "spark",
+  "container":{
+    "type" : "DOCKER",
+    "docker": {
+      "image" : "docker.jangl.com/spark:2.0",
+      "forcePullImage": true
+    }
+  },
+  "cmd": "./scripts/start-mesos-dispatcher.sh",
+  "ports": [
+    0,
+    0
+  ],
+  "env": {
+    "AWS_ACCESS_KEY": "AKIAJ7SUBYDIQKNSMXCQ",
+    "AWS_SECRET_KEY": "Ct4s6d6IcPOVrDF7GxOlwSh9DIoTCgYQTvj7K",
+    "ZK_QUORUM": "10.128.9.253:2181,10.128.9.176:2181,10.128.9.125:2181"
+  },
+  "healthChecks" : [
+    {
+      "path":"/",
+      "portIndex" : 1,
+      "protocol" : "HTTP",
+      "gracePeriodSeconds" : 5,
+      "intervalSeconds" : 60,
+      "timeoutSeconds" : 10,
+      "maxConsecutivesFailures":3
+    }
+  ],
+  "instances": 1,
+  "cpus": 1,
+  "mem": 1024
+}

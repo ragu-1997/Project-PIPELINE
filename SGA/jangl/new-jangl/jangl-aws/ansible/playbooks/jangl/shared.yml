@@ -1,0 +1,109 @@
+---
+- hosts: tag_Service_resource
+  roles:
+    - marathon_deploy
+    - chronos_deploy
+  vars:
+    jangl_caps_docker_image: "docker.jangl.com/jangl-caps:{{ jangl_caps_version | default('latest') }}"
+    jangl_location_docker_image: "docker.jangl.com/jangl-location:{{ jangl_location_version | default('latest') }}"
+    jangl_short_code_docker_image: "docker.jangl.com/jangl-short-code:{{ jangl_short_code_version | default('latest') }}"
+    jangl_reset_caps_docker_image: "docker.jangl.com/jangl-calls:latest"
+    jangl_short_code_external_subdomain: "short"
+
+    marathon_apps:
+      - name: jangl_caps
+        app: &marathon-app
+          id: shared/jangl-caps
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_caps_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 9000, hostPort: 0, protocol: 'tcp'}
+          env: "{{ deploy.jangl_caps.env }}"
+          instances: 1
+          cpus: 0.3
+          mem: 1024
+          labels:
+            tags: "backend,uwsgi"
+            overrideTaskName: "caps"
+          fetch:
+            - uri: "file:///etc/docker.tar.gz"
+          healthChecks:
+            - protocol: "COMMAND"
+              command: "uwsgi --ping $HOST:$PORT0"
+              gracePeriodSeconds: 10
+              intervalSeconds: 15
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+      - name: jangl_location
+        app:
+          << : *marathon-app
+          id: shared/jangl-location
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_location_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 8000, hostPort: 0, protocol: 'tcp'}
+          env: "{{ deploy.jangl_location.env }}"
+          labels:
+            tags: "backend,http"
+            overrideTaskName: "location"
+          healthChecks:
+            - protocol: "MESOS_HTTP"
+              gracePeriodSeconds: 10
+              intervalSeconds: 15
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+      - name: jangl_short_code
+        app:
+          << : *marathon-app
+          id: shared/jangl-short-code
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_short_code_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 8000, hostPort: 0, protocol: 'tcp'}
+          env: "{{ deploy.jangl_short_code.env }}"
+          labels:
+            tags: "external,http,hsts"
+            overrideTaskName: "{{ jangl_short_code_external_subdomain }}"
+          healthChecks:
+            - protocol: "MESOS_TCP"
+              gracePeriodSeconds: 10
+              intervalSeconds: 15
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+    migrate_commands:
+      - name: Migrate Location DB
+        image: "{{ jangl_location_docker_image }}"
+        command: "./load_redis.py"
+        env: "{{ deploy.jangl_location.env }}"
+
+    chronos_jobs:
+      - name: jangl-reset_caps
+        command: "python /app/manage.py reset_caps"
+        docker_image: "{{ jangl_reset_caps_docker_image }}"
+        env:
+          - "DEBUG=false"
+          - "ENVIRONMENT={{ jangl_environment }}"
+          - "TWILIO_INBOUND_APPLICATION={{ jangl_twilio_inbound_application }}"
+          - "TWILIO_INBOUND_SID={{ jangl_twilio_sid }}"
+          - "TWILIO_INBOUND_API_KEY={{ jangl_twilio_api_key }}"
+          - "TWILIO_INBOUND_TEST_SID={{ jangl_twilio_test_sid }}"
+          - "TWILIO_INBOUND_TEST_API_KEY={{ jangl_twilio_test_api_key }}"
+          - "USE_HOST_PGBOUNCER=true"
+        start_time: "2020-01-01T00:00:00Z"
+        run_interval: PT1H
+        shell: true
+        cpus: 0.2
+        disk: 256
+        mem: 1024

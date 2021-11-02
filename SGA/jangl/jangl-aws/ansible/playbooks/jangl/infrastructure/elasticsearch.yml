@@ -1,0 +1,170 @@
+---
+- hosts: tag_Service_resource
+  roles:
+    - marathon_deploy
+  vars:
+    elasticsearch_docker_image: "docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.2"
+    kibana_docker_image: "docker.elastic.co/kibana/kibana-oss:6.2.2"
+
+    marathon_apps:
+      - app:
+          id: "/elasticsearch/calls"
+          instances: 1
+          cpus: 1
+          mem: 4096
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ elasticsearch_docker_image }}"
+              network: "HOST"
+              parameters:
+                - {key: 'volume-driver', value: 'rexray'}
+                - {key: 'volume', value: 'calls-elasticsearch-master-1:/usr/share/elasticsearch/data'}
+                - {key: 'ulimit', value: 'memlock=-1:-1'}
+          ports: [9200, 9300]
+          requirePorts: true
+          env:
+            ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+            TAKE_FILE_OWNERSHIP: "1"
+            bootstrap.memory_lock: "true"
+            cluster.name: "calls-elasticsearch"
+            discovery.type: "single-node"
+            http.port: "9200"
+            http.publish_port: "9200"
+            network.publish_host: "${HOST}"
+            node.data: "true"
+            node.ingest: "true"
+            node.master: "true"
+            node.name: "calls-master-1"
+            search.remote.connect: "false"
+            transport.publish_port: "9300"
+            transport.tcp.port: "9300"
+          labels:
+            MARATHON_SINGLE_INSTANCE_APP: "true"
+            overrideTaskName: "calls-elasticsearch"
+            tags: "master"
+          upgradeStrategy:
+            minimumHealthCapacity: 0
+            maximumOverCapacity: 0
+          healthChecks:
+            - protocol: "MESOS_HTTP"
+              gracePeriodSeconds: 60
+              intervalSeconds: 5
+              portIndex: 0
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+      - app:
+          id: "/elasticsearch/calls-kibana"
+          instances: 1
+          cpus: 1
+          mem: 2048
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ kibana_docker_image }}"
+              network: "HOST"
+              parameters:
+                - {key: 'volume-driver', value: 'rexray'}
+                - {key: 'volume', value: 'calls-kibana:/usr/share/kibana/data'}
+          ports: [5601]
+          requirePorts: true
+          env:
+            ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+            ELASTICSEARCH_REQUESTTIMEOUT: "600000"
+            ELASTICSEARCH_URL: "http://calls-elasticsearch.service.consul:9200"
+          labels:
+            MARATHON_SINGLE_INSTANCE_APP: "true"
+            overrideTaskName: "calls-kibana"
+            tags: "external,http,protected"
+          upgradeStrategy:
+            minimumHealthCapacity: 0
+            maximumOverCapacity: 0
+          healthChecks:
+            - protocol: "MESOS_HTTP"
+              gracePeriodSeconds: 60
+              intervalSeconds: 5
+              portIndex: 0
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+      - app:
+          id: "/elasticsearch/pingpost"
+          instances: 1
+          cpus: 1
+          mem: 4096
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ elasticsearch_docker_image }}"
+              network: "HOST"
+              parameters:
+                - {key: 'volume-driver', value: 'rexray'}
+                - {key: 'volume', value: 'pingpost-elasticsearch-master-1:/usr/share/elasticsearch/data'}
+                - {key: 'ulimit', value: 'memlock=-1:-1'}
+          ports: [9200, 9300]
+          requirePorts: true
+          env:
+            ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+            TAKE_FILE_OWNERSHIP: "1"
+            bootstrap.memory_lock: "true"
+            cluster.name: "pingpost-elasticsearch"
+            discovery.type: "single-node"
+            http.port: "9200"
+            http.publish_port: "9200"
+            network.publish_host: "${HOST}"
+            node.data: "true"
+            node.ingest: "true"
+            node.master: "true"
+            node.name: "pingpost-master-1"
+            search.remote.connect: "false"
+            transport.publish_port: "9300"
+            transport.tcp.port: "9300"
+          labels:
+            MARATHON_SINGLE_INSTANCE_APP: "true"
+            overrideTaskName: "pingpost-elasticsearch"
+            tags: "master"
+          upgradeStrategy:
+            minimumHealthCapacity: 0
+            maximumOverCapacity: 0
+          healthChecks:
+            - protocol: "MESOS_HTTP"
+              gracePeriodSeconds: 60
+              intervalSeconds: 5
+              portIndex: 0
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+      - app:
+          id: "/elasticsearch/pingpost-kibana"
+          instances: 1
+          cpus: 1
+          mem: 2048
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ kibana_docker_image }}"
+              network: "HOST"
+              parameters:
+                - {key: 'volume-driver', value: 'rexray'}
+                - {key: 'volume', value: 'pingpost-kibana:/usr/share/kibana/data'}
+          ports: [5601]
+          requirePorts: true
+          env:
+            ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+            ELASTICSEARCH_REQUESTTIMEOUT: "600000"
+            ELASTICSEARCH_URL: "http://pingpost-elasticsearch.service.consul:9200"
+          labels:
+            MARATHON_SINGLE_INSTANCE_APP: "true"
+            overrideTaskName: "pingpost-kibana"
+            tags: "external,http,protected"
+          upgradeStrategy:
+            minimumHealthCapacity: 0
+            maximumOverCapacity: 0
+          healthChecks:
+            - protocol: "MESOS_HTTP"
+              gracePeriodSeconds: 60
+              intervalSeconds: 5
+              portIndex: 0
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3

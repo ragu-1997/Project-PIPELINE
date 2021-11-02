@@ -1,0 +1,18 @@
+---
+- hosts: tag_Service_resource
+  become: yes
+  tasks:
+    - name: check service status
+      check_mode: yes
+      service:
+        name: "{{ item }}"
+        state: started
+      loop:
+        - mesos-slave
+        - nginx-consul
+        - pgbouncer
+        - rexray
+      register: results
+
+    - command: "false"
+      when: results.changed

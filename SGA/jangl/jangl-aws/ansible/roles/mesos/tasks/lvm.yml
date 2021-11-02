@@ -1,0 +1,14 @@
+---
+- name: configure lvm for mesos
+  become: yes
+  template:
+    src: mesos-volume.conf.j2
+    dest: /etc/mantl/filesystems.d/21-mesos-volume.conf
+    mode: 0644
+  notify:
+    - reload lvm config
+  tags:
+    - mesos
+    - disk
+
+- meta: flush_handlers

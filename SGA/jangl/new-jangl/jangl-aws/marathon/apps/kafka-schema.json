@@ -1,0 +1,24 @@
+{
+  "id": "kafka-schema",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "docker.jangl.com/cp-schema-registry:5.0.0",
+      "forcePullImage": true,
+      "network": "BRIDGE",
+      "portMappings": [
+        {"containerPort": 0, "protocol": "tcp"}
+      ]
+    }
+  },
+  "env": {
+    "SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL": "zookeeper.service.consul:2181",
+    "SCHEMA_REGISTRY_KAFKASTORE_TOPIC": "_kafka_schemas"
+  },
+  "labels": {
+    "tags": "backend,http"
+  },
+  "instances": 3,
+  "cpus": 1,
+  "mem": 1024
+}

@@ -1,0 +1,50 @@
+{
+  "id": "/drone/server",
+  "cpus": 1,
+  "mem": 1024,
+  "instances": 1,
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "forcePullImage": true,
+      "image": "drone/drone:1",
+      "parameters": [],
+      "privileged": false
+    },
+    "portMappings": [
+      {
+        "containerPort": 80,
+        "hostPort": 0,
+        "protocol": "tcp"
+      }
+    ]
+  },
+  "env": {
+    "AWS_ACCESS_KEY_ID": "AKIAWLICQ4YPV4DWV2FY",
+    "AWS_SECRET_ACCESS_KEY": "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",
+    "AWS_DEFAULT_REGION": "us-east-1",
+    "AWS_REGION": "us-east-1",
+    "DRONE_AGENTS_ENABLED": "true",
+    "DRONE_COOKIE_SECRET": "b2e465874232b2b2f5a283f17770d7fe",
+    "DRONE_DATABASE_DRIVER": "postgres",
+    "DRONE_DATABASE_DATASOURCE": "postgres://drone:Jj1o4UeDiXrF8nUb@postgres-drone.cewygxfcbvsc.us-east-1.rds.amazonaws.com:5432/drone",
+    "DRONE_DATABASE_SECRET": "a24daf0e7aa28bd6f8c88d1569cf263e",
+    "DRONE_GITHUB_CLIENT_ID": "044054e0d71c91535281",
+    "DRONE_GITHUB_CLIENT_SECRET": "0c42eb711896af4c8356b30f2fd1b8ae418d7a12",
+    "DRONE_RPC_SECRET": "e1ed07ef07ceb06dae29e9ddd3302dd6",
+    "DRONE_S3_BUCKET": "jangl-drone-storage",
+    "DRONE_SERVER_HOST": "drone.jan.gl",
+    "DRONE_SERVER_PROTO": "http",
+    "DRONE_USER_CREATE": "username:ryananguiano,admin:true"
+  },
+  "healthChecks": [],
+  "labels": {
+    "overrideTaskName": "drone",
+    "tags": "external,http"
+  },
+  "networks": [
+    {
+      "mode": "container/bridge"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "jangl-accounts-autoreload-sites-source",
+  "config": {
+    "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+    "connection.url": "jdbc:postgresql://postgres-accounts-new2.cewygxfcbvsc.us-east-1.rds.amazonaws.com:5432/jangl_accounts?user=jangl_accounts&password=m0rpApkyleEy&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory",
+    "table.whitelist": "sites_marketplaceautoreload,sites_callminutesautoreload",
+    "mode": "timestamp",
+    "timestamp.column.name": "modified",
+    "transforms": "valuekey",
+    "transforms.valuekey.type": "org.apache.kafka.connect.transforms.ValueToKey",
+    "transforms.valuekey.fields": "site_id",
+    "topic.prefix": "jangl.accounts.db."
+  }
+}

@@ -1,0 +1,99 @@
+---
+- hosts: tag_Service_resource
+  roles:
+    - marathon_deploy
+  vars:
+    hydra_docker_image: "oryd/hydra:v1.3.2"
+    jangl_auth_docker_image: "docker.jangl.com/jangl-auth:{{ jangl_auth_version | default('latest') }}"
+
+    marathon_apps:
+      - name: hydra
+        app: &hydra
+          id: auth/ory-hydra-public
+          instances: 1
+          cpus: 1
+          mem: 1024
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ hydra_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 4444, hostPort: 0, protocol: 'tcp'}
+          args: [ "serve", "public" ]
+          env:
+            DSN: "{{ deploy.hydra.env.DSN }}"
+            SECRETS_SYSTEM: "{{ deploy.hydra.env.SECRETS_SYSTEM }}"
+            SERVE_ADMIN_CORS_ALLOWED_METHODS: "POST,GET,PUT,DELETE"
+            SERVE_ADMIN_CORS_ENABLED: "true"
+            SERVE_TLS_ALLOW_TERMINATION_FROM: "{{ ansible_env.OPENVPN_NETWORK_ROUTE }}/16"
+            SQA_OPT_OUT: "true"
+            URLS_CONSENT: "https://auth.{{ jangl_base_domain }}/consent/"
+            URLS_ERROR: "https://auth.{{ jangl_base_domain }}/"
+            URLS_LOGIN: "https://auth.{{ jangl_base_domain }}/login/"
+            URLS_LOGOUT: "https://auth.{{ jangl_base_domain }}/logout/"
+            URLS_POST_LOGOUT_REDIRECT: "https://auth.{{ jangl_base_domain }}/"
+            URLS_SELF_ISSUER: "https://oauth.{{ jangl_base_domain }}/"
+          labels:
+            tags: "external,http"
+            overrideTaskName: "oauth"
+          healthChecks:
+            - protocol: "MESOS_HTTP"
+              path: /health/ready
+              gracePeriodSeconds: 10
+              intervalSeconds: 15
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+      - name: hydra_admin
+        app:
+          <<: *hydra
+          id: auth/ory-hydra-admin
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ hydra_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 4445, hostPort: 0, protocol: 'tcp'}
+          args: [ "serve", "admin", "--dangerous-force-http" ]
+          labels:
+            tags: "backend,http"
+            overrideTaskName: "hydra-admin"
+
+      - name: jangl_auth
+        app:
+          id: "auth/jangl-auth"
+          instances: 1
+          cpus: 0.5
+          mem: 1024
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_auth_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 8000, hostPort: 0, protocol: 'tcp'}
+          fetch:
+            - uri: "file:///etc/docker.tar.gz"
+          env:
+            CSRF_TRUSTED_ORIGINS: "auth.{{ jangl_base_domain }}"
+            DEFAULT_SITE_DOMAIN: "https://auth.{{ jangl_base_domain }}"
+            HYDRA_URL: "https://oauth.{{ jangl_base_domain }}"
+            STORAGE_DOMAIN: "https://{{ jangl_storage_domain }}"
+          labels:
+            tags: "external,http"
+            overrideTaskName: "auth"
+          healthChecks:
+            - protocol: "MESOS_HTTP"
+              gracePeriodSeconds: 10
+              intervalSeconds: 15
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+    migrate_commands:
+      - name: Migrate Hydra DB
+        image: "{{ hydra_docker_image }}"
+        command: "migrate sql --yes --read-from-env"
+        env:
+            DSN: "{{ deploy.hydra.env.DSN }}"

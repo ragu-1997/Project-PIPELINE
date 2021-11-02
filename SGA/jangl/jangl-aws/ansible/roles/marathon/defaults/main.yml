@@ -1,0 +1,38 @@
+---
+marathon_version: "1.8.232"
+mesosphere_yum_repo: "https://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-2.noarch.rpm"
+marathon_yum_package: "marathon-{{ marathon_version }}"
+
+marathon_hostname: "{{ ec2_tag_Name }}.node.dc1.consul"
+marathon_port: 8080
+marathon_env_java_opts: '-Xmx512m'
+marathon_env_vars:
+  - "JAVA_OPTS={{ marathon_env_java_opts }}"
+  - "MARATHON_LOGGING_LEVEL=warn"
+
+zookeeper_dns: "zookeeper.service.consul"
+zookeeper_port: 2181
+zookeeper_hostnames: "{{zookeeper_dns}}:{{zookeeper_port}}"
+
+mesos_zookeeper_path: "/mesos"
+marathon_zookeeper_path: "/marathon"
+mesos_zookeeper_masters: "zk://{{ zookeeper_hostnames }}{{ mesos_zookeeper_path }}"
+marathon_zookeeper_state: "zk://{{ zookeeper_hostnames }}{{ marathon_zookeeper_path }}"
+
+artifact_store: "file:///etc/marathon/store"
+checkpoint: "yes"
+marathon_mesos_role: ""
+
+marathon_additional_configs: []
+  # - name: EVENT_SUBSCRIBER
+  #   value: http_callback
+
+
+# jobs
+mesos_consul_image: ciscocloud/mesos-consul
+mesos_consul_image_tag: v0.4.0
+mesos_consul_refresh: "5s"
+mantl_api_image: ciscocloud/mantl-api
+mantl_api_image_tag: 0.2.2
+mantl_api_config_url: ""
+mantl_api_config_file: ""

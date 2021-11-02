@@ -1,0 +1,5 @@
+---
+enable_crowdstrike: True
+
+crowdstrike_yum_file: "falcon-sensor-5.43.0-10807.el8.x86_64.rpm"
+crowdstrike_settings_cid: "BE3B1C0EA6DB4D11860B68FD5CF605CF-E2"

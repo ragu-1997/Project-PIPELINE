@@ -1,0 +1,139 @@
+---
+- hosts: tag_Service_resource
+  roles:
+    - marathon_deploy
+  vars:
+    logstash_docker_image: "docker.jangl.com/kafka-logstash:6.2.2"
+
+    marathon_apps:
+      - name: logstash_inbound_ping_post
+        app: &marathon-app
+          id: "/logstash/inbound-ping-post"
+          args:
+            - "logstash"
+            - "-e"
+            - >
+                input {
+                  kafka {
+                    group_id => "logstash-ping-post"
+                    client_id => "logstash-ping-post"
+                    bootstrap_servers => "kafka.service.consul:9092"
+                    topics => ["jangl.webleads.inbound_ping_post"]
+                    decorate_events => true
+                    auto_offset_reset => "earliest"
+                    type => "inbound"
+                    codec => avro_schema_registry { endpoint => "http://kafka-schema.service.consul:8081" }
+                    key_deserializer_class => "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+                    value_deserializer_class => "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+                  }
+                }
+                filter {
+                  ruby { code => "event.set('duration', event.get('response_timestamp') - event.get('request_timestamp'))" }
+                  date { match => [ "request_timestamp", "UNIX" ] }
+                  date { match => [ "request_timestamp", "UNIX" ] target => "request_timestamp" }
+                  date { match => [ "response_timestamp", "UNIX" ] target => "response_timestamp" }
+                }
+                output {
+                  elasticsearch { hosts => ["http://master.pingpost-elasticsearch.service.consul:9200"] }
+                }
+          instances: 1
+          cpus: 0.3
+          mem: 2048
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ logstash_docker_image }}"
+          upgradeStrategy:
+            minimumHealthCapacity: 0
+            maximumOverCapacity: 0
+          fetch:
+            - uri: "file:///etc/docker.tar.gz"
+
+      - name: logstash_outbound_ping_post
+        app:
+          << : *marathon-app
+          id: "/logstash/outbound-ping-post"
+          args:
+            - "logstash"
+            - "-e"
+            - >
+                input {
+                  kafka {
+                    group_id => "logstash-outbound-ping-post"
+                    client_id => "logstash-outbound-ping-post"
+                    bootstrap_servers => "kafka.service.consul:9092"
+                    topics => ["jangl.webleads.outbound_ping_post"]
+                    decorate_events => true
+                    auto_offset_reset => "earliest"
+                    type => "outbound"
+                    codec => avro_schema_registry { endpoint => "http://kafka-schema.service.consul:8081" }
+                    key_deserializer_class => "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+                    value_deserializer_class => "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+                  }
+                }
+                filter {
+                  ruby { code => "event.set('duration', event.get('response_timestamp') - event.get('request_timestamp'))" }
+                  date { match => [ "request_timestamp", "UNIX" ] }
+                  date { match => [ "request_timestamp", "UNIX" ] target => "request_timestamp" }
+                  date { match => [ "response_timestamp", "UNIX" ] target => "response_timestamp" }
+                  mutate { convert => { "result.sell_price" => "float" } }
+                }
+                output {
+                  elasticsearch { hosts => ["http://master.pingpost-elasticsearch.service.consul:9200"] }
+                }
+
+      - name: logstash_calls_phone_log
+        app:
+          << : *marathon-app
+          id: "/logstash/calls-phone-log"
+          args:
+            - "logstash"
+            - "-e"
+            - >
+                input {
+                  kafka {
+                    group_id => "logstash-calls-phone-log"
+                    client_id => "logstash-calls-phone-log"
+                    bootstrap_servers => "kafka.service.consul:9092"
+                    topics => ["jangl.calls.inbound_call_log"]
+                    decorate_events => true
+                    auto_offset_reset => "earliest"
+                    type => "log"
+                    codec => avro_schema_registry { endpoint => "http://kafka-schema.service.consul:8081" }
+                    value_deserializer_class => "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+                  }
+                }
+                filter {
+                  date { match => [ "timestamp", "UNIX" ] }
+                }
+                output {
+                  elasticsearch { hosts => ["http://master.calls-elasticsearch.service.consul:9200"] }
+                }
+
+      - name: logstash_calls_phone_pricing
+        app:
+          << : *marathon-app
+          id: "/logstash/calls-phone-pricing"
+          args:
+            - "logstash"
+            - "-e"
+            - >
+                input {
+                  kafka {
+                    group_id => "logstash-calls-phone-pricing"
+                    client_id => "logstash-calls-phone-pricing"
+                    bootstrap_servers => "kafka.service.consul:9092"
+                    topics => ["jangl.calls.inbound_call_pricing"]
+                    decorate_events => true
+                    auto_offset_reset => "earliest"
+                    type => "pricing"
+                    codec => avro_schema_registry { endpoint => "http://kafka-schema.service.consul:8081" }
+                    value_deserializer_class => "org.apache.kafka.common.serialization.ByteArrayDeserializer"
+                  }
+                }
+                filter {
+                  date { match => [ "timestamp", "UNIX" ] }
+                }
+                output {
+                  elasticsearch { hosts => ["http://master.calls-elasticsearch.service.consul:9200"] }
+                }

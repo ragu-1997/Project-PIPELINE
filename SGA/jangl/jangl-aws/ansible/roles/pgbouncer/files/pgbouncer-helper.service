@@ -1,0 +1,12 @@
+[Unit]
+Description=PgBouncer Startup Helper Service
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=-/usr/bin/mkdir /var/run/pgbouncer
+ExecStart=/usr/bin/chown pgbouncer:pgbouncer /var/run/pgbouncer
+
+[Install]
+WantedBy=pgbouncer.service

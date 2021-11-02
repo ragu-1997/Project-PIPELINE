@@ -1,0 +1,27 @@
+{
+  "name": "jaeger-purge_old_indexes",
+  "schedule": "R/2015-08-31T03:01:00.000Z/P1D",
+  "scheduleTimeZone": "",
+  "epsilon": "PT50M",
+  "cpus": 0.3,
+  "disk": 256,
+  "mem": 128,
+  "container": {
+    "type": "docker",
+    "image": "docker.jangl.com/curator:5.4",
+    "network": "BRIDGE",
+    "volumes": []
+  },
+  "shell": true,
+  "command": "/usr/local/bin/curator_cli --host master.jaeger-elasticsearch.service.consul --port 9200 delete_indices --filter_list '{\"filtertype\":\"age\",\"source\":\"name\",\"direction\":\"older\",\"timestring\":\"%Y-%m-%d\",\"unit\":\"days\",\"unit_count\":\"2\"}'",
+  "executor": "",
+  "executorFlags": "",
+  "retries": 2,
+  "owner": "",
+  "async": false,
+  "softError": false,
+  "dataProcessingJobType": false,
+  "highPriority": false,
+  "runAsUser": "root",
+  "constraints": []
+}

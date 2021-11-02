@@ -1,0 +1,28 @@
+---
+
+- become: yes
+  tags: ["rexray"]
+  block:
+    - name: install rexray packages
+      yum:
+        name: "{{rexray_rpm_url}}"
+        state: present
+        disable_gpg_check: yes
+
+    - name: Create config file directory
+      file: path=/etc/rexray state=directory mode=0755 owner=root group=root
+
+    - name: Add rexray config file
+      template: src=config.yml.j2 dest=/etc/rexray/config.yml mode=0755 owner=root group=root
+      notify: restart rexray
+
+    - name: Update rexray service file
+      copy: src=rexray.service dest=/etc/systemd/system/rexray.service
+      notify: reload systemd
+
+    - name: ensure rexray is running
+      service:
+        name: rexray
+        state: started
+        enabled: yes
+      when: rexray_service

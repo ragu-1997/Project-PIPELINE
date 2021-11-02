@@ -1,0 +1,11 @@
+---
+- hosts: tag_Service_kafka
+  become: yes
+  roles:
+    - consul
+    - dnsmasq
+    - { role: ebs, letter: b}
+    - { role: ebs, letter: c}
+    - { role: ebs, letter: d}
+    - confluent.common
+    - confluent.kafka_broker

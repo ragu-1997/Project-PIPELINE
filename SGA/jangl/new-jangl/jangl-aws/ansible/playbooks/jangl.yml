@@ -1,0 +1,30 @@
+---
+- include: jangl/infrastructure/services.yml
+  tags: ["infrastructure", "services"]
+- include: jangl/infrastructure/metrics.yml
+  tags: ["infrastructure", "metrics"]
+- include: jangl/infrastructure/redis.yml
+  tags: ["infrastructure", "redis"]
+- include: jangl/infrastructure/elasticsearch.yml
+  tags: ["infrastructure", "elasticsearch"]
+- include: jangl/infrastructure/logstash.yml
+  tags: ["infrastructure", "logstash"]
+
+- include: jangl/auth.yml
+  tags: ["deploy", "auth"]
+- include: jangl/accounts.yml
+  tags: ["deploy", "accounts"]
+- include: jangl/shared.yml
+  tags: ["deploy", "shared"]
+- include: jangl/billing.yml
+  tags: ["deploy", "billing"]
+- include: jangl/calls.yml
+  tags: ["deploy", "calls"]
+- include: jangl/webleads.yml
+  tags: ["deploy", "webleads"]
+- include: jangl/platform.yml
+  tags: ["deploy", "platform"]
+- include: jangl/reports.yml
+  tags: ["deploy", "reports"]
+- include: jangl/features.yml
+  tags: ["deploy", "features"]

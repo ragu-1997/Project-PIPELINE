@@ -1,0 +1,14 @@
+{
+  "service": {
+    "name": "{{ zookeeper_service_name }}",
+    "tags": [ "{{ zookeeper_ensemble }}" ],
+    "id": "2181:zkid-{{ zookeeper_id }}",
+    "address": "{{ ec2_private_ip_address }}",
+    "port": 2181,
+    "check": {
+      "args": ["/usr/local/bin/zookeeper_check.sh", "{{ ansible_default_ipv4.address }}"],
+      "interval": "10s",
+      "timeout": "2s"
+    }
+  }
+}

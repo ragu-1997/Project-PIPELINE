@@ -1,0 +1,21 @@
+{
+  "name": "dump-pinglogs",
+  "schedule": "R1/2019-10-30T08:40:00Z/P1D",
+  "epsilon": "P1D",
+  "cpus": 1,
+  "disk": 2048,
+  "mem": 4096,
+  "container": {
+    "type": "docker",
+    "image": "taskrabbit/elasticsearch-dump",
+    "forcePullImage": true
+  },
+  "shell": true,
+  "command": "elasticdump --s3AccessKeyId='AKIAJFQX2MZ7HVSD4A3A' --s3SecretAccessKey='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' --input='http://master.pingpost-elasticsearch.service.consul:9200' --output='s3://jangl-data/ping-logs/2019-10-29-health-insurance.json' --sourceOnly --fileSize='1gb' --searchBody='{\"query\": {\"bool\": {\"must\": [{\"match_all\": {}},{\"match_phrase\": {\"type\": {\"query\": \"inbound\"}}},{\"match_phrase\": {\"event_type\": {\"query\": \"ping\"}}},{\"match_phrase\": {\"vertical\": {\"query\": \"health_insurance\"}}},{\"range\": {\"@timestamp\": {\"gte\": \"2019-10-29T04:00Z\",\"lte\": \"2019-10-30T04:00Z\"}}}]}}}'",
+  "executor": "",
+  "executorFlags": "",
+  "retries": 1,
+  "owner": "",
+  "async": false,
+  "environmentVariables": []
+}

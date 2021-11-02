@@ -1,0 +1,7 @@
+# netdata configuration
+
+[statsd]
+    bind to = udp:* tcp:*
+
+[host labels]
+    type = {{ ec2_tag_Service }}

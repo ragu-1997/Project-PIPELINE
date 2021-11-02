@@ -1,0 +1,82 @@
+---
+- name: install zookeeper scripts
+  become: yes
+  copy:
+    src: "{{ item }}"
+    dest: /usr/local/bin
+    mode: 0755
+  with_items:
+    - zookeeper_check.sh
+    - zookeeper-wait-for-listen.sh
+#    - zookeeper_digest.sh
+#    - zookeeper-update-mantl-0.5-0.6.sh
+  tags:
+    - zookeeper
+
+- name: zookeeper-exhibitor-data docker container
+  docker_container:
+    name: zookeeper-exhibitor-data
+    image: busybox
+    state: present
+    volumes:
+    - /opt/zookeeper/snapshots
+  tags:
+    - zookeeper
+
+- name: check consul directory
+  file: path=/etc/consul state=directory mode=0777
+
+- name: generate zookeeper consul services
+  become: yes
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - src: zk-consul.json.j2
+      dest: /etc/consul/zk-consul.json
+  notify:
+    - reload consul
+  tags:
+    - consul
+
+
+- name: zookeeper-exhibitor docker container
+  docker_container:
+    name: zookeeper-exhibitor
+    image: mbabineau/zookeeper-exhibitor:3.4.6_1.5.5
+    pull: yes
+    state: started
+    restart_policy: always
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
+      - "8181:8181"
+    env:
+      S3_BUCKET: "{{ zookeeper_exhibitor_s3_bucket }}"
+      S3_PREFIX: "{{ zookeeper_s3_prefix }}"
+      AWS_ACCESS_KEY_ID: "{{ zookeeper_exhibitor_aws_key }}"
+      AWS_SECRET_ACCESS_KEY: "{{ zookeeper_exhibitor_aws_secret }}"
+      AWS_REGION: "{{ zookeeper_exhibitor_aws_region }}"
+      HOSTNAME: "{{ ansible_default_ipv4.address }}"
+      ZK_DATA_DIR: "/opt/zookeeper/snapshots"
+    volumes_from:
+      - zookeeper-exhibitor-data
+  tags:
+    - zookeeper
+
+- wait_for: port=8181 timeout=120 host={{ ansible_default_ipv4.address }}
+  tags:
+    - test
+
+- name: checking zookeeper (exhibitor) status
+  uri:
+    url: http://{{ ansible_default_ipv4.address }}:8181/exhibitor/v1/cluster/status
+  tags:
+    - test
+
+- wait_for: port=2181 timeout=600 host={{ ansible_default_ipv4.address }}
+  tags:
+    - test
+
+- meta: flush_handlers

@@ -1,0 +1,8 @@
+---
+- hosts: tag_Service_vpn
+  become: yes
+  gather_facts: yes
+  roles:
+    - consul
+    - dnsmasq
+    - vpn

@@ -1,0 +1,25 @@
+---
+- name: configure lvm for docker
+  become: yes
+  template:
+    src: docker-volume.conf.j2
+    dest: /etc/mantl/filesystems.d/20-docker-volume.conf
+    mode: 0644
+  notify:
+    - reload lvm config
+  tags:
+    - docker
+
+- name: systemd drop-in for storage options
+  become: yes
+  template:
+    src:  "{{ item }}.j2"
+    dest: "/etc/systemd/system/docker.service.d/{{ item }}"
+  with_items:
+    - 14-storage-options.conf
+  notify:
+    - reload systemd
+  tags:
+    - docker
+
+- meta: flush_handlers

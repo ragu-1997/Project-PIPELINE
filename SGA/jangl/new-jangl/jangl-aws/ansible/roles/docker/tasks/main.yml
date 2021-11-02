@@ -1,0 +1,169 @@
+---
+# Workaround for https://github.com/CiscoCloud/mantl/issues/161
+- name: install latest device-mapper and iptables
+  become: yes
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - device-mapper-libs
+    - device-mapper-persistent-data
+    - iptables-services
+  tags:
+    - docker
+
+# - name: Add docker to firewall
+#   ansible.posix.firewalld:
+#     zone: trusted
+#     interface: docker0
+#     permanent: yes
+#     state: enabled
+#   tags:
+#     - docker
+
+- name: enable Docker, Inc. yum repo
+  become: yes
+  copy:
+    src: docker.repo
+    dest: /etc/yum.repos.d/docker.repo
+  tags:
+    - docker
+
+- name: download docker gc sources
+  get_url: url={{ dockergc_url }} dest=/etc/yum.repos.d/docker-gc.repo
+
+- name: create rsyslog.d
+  become: yes
+  file:
+    dest: /etc/rsyslog.d
+    state: directory
+  tags:
+    - docker
+
+- name: create directory for systemd drop-ins
+  become: yes
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    mode: 0755
+  tags:
+    - docker
+
+# We have to restart docker when these files have changed, otherwise the updated
+# configuration won't come into effect.
+- name: systemd drop-in for options
+  become: yes
+  template:
+    src:  "{{ item }}.j2"
+    dest: "/etc/systemd/system/docker.service.d/{{ item }}"
+  with_items:
+    - 10-options.conf
+    - 12-network-options.conf
+  notify:
+    - reload docker
+  tags:
+    - docker
+
+- name: systemd drop-in for ExecStart
+  become: yes
+  copy:
+    src: 20-ExecStart.conf.j2
+    dest: /etc/systemd/system/docker.service.d/20-ExecStart.conf
+  notify:
+    - reload docker
+  tags:
+    - docker
+
+- name: install docker packages
+  become: yes
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ docker_package }}"
+  tags:
+    - docker
+
+- name: ensure docker config dir exists
+  become: yes
+  file:
+    path: "{{item}}"
+    state: directory
+  loop:
+    - /root/.docker
+    - /etc/docker
+  tags:
+    - docker
+
+- name: setup private docker registry credentials
+  become: yes
+  when: do_private_docker_registry
+  template:
+    src: config.json.j2
+    dest: "{{ item }}"
+  with_items:
+    - "/root/.docker/config.json"
+    - "/etc/docker/config.json"
+  tags:
+    - docker
+    - docker_registry
+  register: docker_registry_credentials
+
+- name: Remove global tarball
+  become: yes
+  file: state=absent path=/etc/docker.tar.gz
+  when: do_private_docker_registry
+  tags:
+    - docker
+    - docker_registry
+
+- name: add docker registry credentials to /etc/
+  become: yes
+  when: do_private_docker_registry
+  command: tar cvzf /etc/docker.tar.gz .docker
+  args:
+    chdir: /root
+  tags:
+    - docker
+    - docker_registry
+    - skip_ansible_lint
+
+- include: lvm.yml
+  when: uses_lvm
+
+- name: enable docker
+  become: yes
+  service:
+    name: docker
+    enabled: yes
+    state: started
+  tags:
+    - docker
+
+- name: install docker-py
+  become: yes
+  pip:
+    name: docker-py
+    state: latest
+  tags:
+    - docker
+
+- name: add centos to docker group
+  become: yes
+  user: name=centos groups=docker
+  tags:
+    - docker
+
+- name: install docker-gc
+  become: yes
+  yum:
+    name: docker-gc
+    state: latest
+  tags:
+    - docker
+  when: docker_gc_install is defined and docker_gc_install|bool
+
+- include: consul.yml
+  when: docker_add_consul
+
+- meta: flush_handlers

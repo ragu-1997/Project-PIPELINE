@@ -1,0 +1,29 @@
+{
+  "id": "secor-daily",
+  "cpus": 1.5,
+  "mem": 2048,
+  "instances": 1,
+
+  "container":{
+    "type" : "DOCKER",
+    "docker": {
+      "image" : "docker.jangl.com/secor:0.20",
+      "forcePullImage": true
+    }
+  },
+  "env": {
+    "AWS_ACCESS_KEY": "AKIAJ7SUBYDIQKNSMXCQ",
+    "AWS_SECRET_KEY": "Ct4s6d6IcPOVrDF7GxOlwSh9DIoTCgYQTvj7K",
+    "ZK_QUORUM": "10.128.1.54:2181,10.128.3.65:2181,10.128.5.100:2181",
+    "SEED_BROKER_HOST": "10.128.1.158",
+    "S3_BUCKET": "jangl-data",
+    "TOPIC_FILTER": "jangl((?!ping_post).)*",
+    "TS_NAME": "timestamp",
+    "SECOR_GROUP": "secor_partition",
+    "S3_PATH": "raw_logs/",
+    "MESSAGE_PARSER_CLASS": "com.pinterest.secor.parser.AvroMessageParser",
+    "LOCAL_PATH": "/mnt/secor_data/message_logs/partition",
+    "FILE_MAX_SECONDS": "3600",
+    "CONFIG_FILE": "secor.prod.partition.properties"
+  }
+}

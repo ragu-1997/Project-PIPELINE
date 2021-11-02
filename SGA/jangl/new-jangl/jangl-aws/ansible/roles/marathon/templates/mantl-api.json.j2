@@ -1,0 +1,39 @@
+{
+  "id": "mantl-api",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "{{ mantl_api_image }}:{{ mantl_api_image_tag }}",
+      "network": "BRIDGE",
+      "portMappings": [
+        { "containerPort": 4001, "hostPort": 0, "protocol": "tcp" }
+      ],
+      "forcePullImage": true
+    }
+  },
+  "instances": 1,
+  "cpus": 0.1,
+  "mem": 128,
+  "uris": [{% if mantl_api_config_url != "" %}
+    "{{ mantl_api_config_url }}" {% endif %}
+  ],
+  "env": {
+    "MANTL_API_CONFIG_FILE": "{{ mantl_api_config_file }}",
+    "MANTL_API_CONSUL": "http://consul.service.consul:8500",
+    "MANTL_API_MARATHON": "http://marathon.service.consul:8080"
+  },
+  "labels": {
+      "traefik.enable": "false"
+  },
+  "healthChecks": [
+    {
+      "protocol": "HTTP",
+      "path": "/health",
+      "gracePeriodSeconds": 5,
+      "intervalSeconds": 10,
+      "portIndex": 0,
+      "timeoutSeconds": 10,
+      "maxConsecutiveFailures": 5
+    }
+  ]
+}

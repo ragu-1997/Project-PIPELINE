@@ -1,0 +1,11 @@
+{
+  "service": {
+    "name": "pgbouncer",
+    "port": 5432,
+    "check": {
+      "tcp": "localhost:5432",
+      "interval": "15s",
+      "timeout": "2s"
+    }
+  }
+}

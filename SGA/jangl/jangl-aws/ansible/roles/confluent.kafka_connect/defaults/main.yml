@@ -1,0 +1,100 @@
+kafka_connect_group_id: compose-connect-group
+
+kafka_connect_jolokia_java_arg_buildout: "-javaagent:{{jolokia_jar_path}}=port={{kafka_connect_jolokia_port}},host=0.0.0.0"
+kafka_connect_jolokia_java_arg: "{{ kafka_connect_jolokia_java_arg_buildout if jolokia_enabled|bool else '' }}"
+kafka_connect_bootstrap_servers: "kafka.service.consul:9092"
+
+# kafka_connect_jmx_java_arg: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port={{ kafka_connect_jmx_port }} -Djava.rmi.server.hostname={{ ansible_default_ipv4.address }}"
+kafka_connect_jmx_java_arg: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port={{ kafka_connect_jmx_port }} -Djava.rmi.server.useLocalHostname=true"
+kafka_connect_log4j_file: /etc/kafka/connect_distributed_log4j.properties
+
+kafka_connect_open_file_limit: "{{open_file_limit}}"
+kafka_connect_service_overrides:
+  LimitNOFILE: "{{kafka_connect_open_file_limit}}"
+kafka_connect_service_environment_overrides:
+  KAFKA_HEAP_OPTS: "-Xms256M -Xmx2G"
+  KAFKA_OPTS: "{{kafka_connect_jolokia_java_arg}}"
+  # KAFKA_JMX_OPTS: "{{kafka_connect_jmx_java_arg}}"
+  JMX_PORT: "{{ kafka_connect_jmx_port }}"
+  KAFKA_LOG4J_OPTS: "-Dlog4j.configuration=file:{{kafka_connect_log4j_file}}"
+
+kafka_connect_service_name: kafka-connect
+kafka_connect_topic_prefix: __connect
+kafka_connect_topic_replication_factor: 3
+
+kafka_connect_packages:
+  - confluent-kafka-2.12
+  - confluent-kafka-connect-elasticsearch
+  - confluent-kafka-connect-jdbc
+  - confluent-kafka-connect-jms
+  - confluent-kafka-connect-replicator
+  - confluent-kafka-connect-s3
+  - confluent-kafka-connect-storage-common
+  - confluent-security
+  - confluent-control-center
+
+kafka_connect_plugin_path: "/usr/share/connectors"
+
+uses_lenses_sql: False
+lenses_sql_connect_version: "4.1.1"
+lenses_sql_connect_path: "{{kafka_connect_plugin_path}}/lenses-sql-streaming"
+lenses_sql_connect_url: "https://files.jan.gl/repos/kafka-connect/lenses-sql-connect-{{lenses_sql_connect_version}}.tar.gz"
+lenses_sql_state_path: "/var/cache/lenses-sql-kstream-state"
+
+uses_lvm: False
+lenses_storage_driver: "overlay2"
+lenses_volume_name: lenses
+lenses_volume_size: "100%VG"
+lenses_volume_mount: "{{ lenses_sql_state_path }}"
+lenses_volume_device: "/dev/{{ volume_group_name }}/{{ lenses_volume_name }}"
+lenses_volume_fs_type: "xfs"
+lenses_volume_fs_opts: "-i size=512"
+
+uses_lenses_connectors: False
+lenses_stream_reactor_version: "2.1.3"
+lenses_kafka_version: "2.5.0"
+lenses_stream_reactor_filename: "stream-reactor-{{lenses_stream_reactor_version}}-{{lenses_kafka_version}}"
+lenses_stream_reactor_path: "/opt/{{lenses_stream_reactor_filename}}"
+lenses_stream_reactor_url: "https://github.com/lensesio/stream-reactor/releases/download/{{lenses_stream_reactor_version}}/{{lenses_stream_reactor_filename}}.tar.gz"
+
+lenses_secret_provider_version: "2.1.5"
+lenses_secret_provider_path: "/opt/secret-provider/"
+lenses_secret_provider_url: "https://github.com/lensesio/secret-provider/releases/download/{{lenses_secret_provider_version}}/secret-provider-{{lenses_secret_provider_version}}-all.jar"
+
+kafka_connect:
+  config_file: /etc/kafka/connect-distributed.properties
+  log4j_file: "{{kafka_connect_log4j_file}}"
+  appender_log_path: /var/log/kafka/
+  appender_log_name: connect-distributed.log
+  appender_max_log_files: 10
+  appender_log_file_size: 100MB
+  service_name: confluent-kafka-connect
+  systemd_file: /usr/lib/systemd/system/confluent-kafka-connect.service
+  systemd_override: /etc/systemd/system/confluent-kafka-connect.service.d
+  user: cp-kafka-connect
+  group: confluent
+  properties:
+    rest.port: "{{kafka_connect_rest_port}}"
+    group.id: "{{kafka_connect_group_id}}"
+    config.storage.topic: "{{ kafka_connect_topic_prefix }}-config"
+    status.storage.topic: "{{ kafka_connect_topic_prefix }}-status"
+    offset.storage.topic: "{{ kafka_connect_topic_prefix }}-offsets"
+    config.storage.replication.factor: "{{ kafka_connect_topic_replication_factor }}"
+    status.storage.replication.factor: "{{ kafka_connect_topic_replication_factor }}"
+    offset.storage.replication.factor: "{{ kafka_connect_topic_replication_factor }}"
+    offset.flush.interval.ms: 10000
+    key.converter: io.confluent.connect.avro.AvroConverter
+    key.converter.schema.registry.url: "http://agent.mesos.service.consul:8081"
+    key.converter.enhanced.avro.schema.support: "true"
+    value.converter: io.confluent.connect.avro.AvroConverter
+    value.converter.schema.registry.url: "http://agent.mesos.service.consul:8081"
+    value.converter.enhanced.avro.schema.support: "true"
+    internal.key.converter: org.apache.kafka.connect.json.JsonConverter
+    internal.key.converter.schemas.enable: false
+    internal.value.converter: org.apache.kafka.connect.json.JsonConverter
+    internal.value.converter.schemas.enable: false
+    connector.client.config.override.policy: All
+    plugin.path: "/usr/share/java,/usr/share/connectors{% if uses_lenses_connectors %},{{lenses_stream_reactor_path}}/libs,{{lenses_secret_provider_path}}{% endif %}"
+  systemd:
+    enabled: yes
+    state: started

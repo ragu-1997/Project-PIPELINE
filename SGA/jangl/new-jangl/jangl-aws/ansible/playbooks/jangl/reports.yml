@@ -1,0 +1,73 @@
+---
+- hosts: tag_Service_resource
+  roles:
+    - marathon_deploy
+  vars:
+    jangl_reports_docker_image: "docker.jangl.com/jangl-reports:{{ jangl_reports_version | default('latest') }}"
+    jangl_reports_buyer_worker_docker_image: "docker.jangl.com/reports-buyer-pingpost:{{ jangl_reports_buyer_worker_version | default('latest') }}"
+    jangl_reports_vendor_worker_docker_image: "docker.jangl.com/reports-vendor-pingpost:{{ jangl_reports_vendor_worker_version | default('latest') }}"
+    jangl_reports_filters_worker_docker_image: "docker.jangl.com/reports-unmatched-filters:{{ jangl_reports_filters_worker_version | default('latest') }}"
+
+    marathon_apps:
+      - name: jangl_reports
+        app: &marathon-app
+          id: reports/jangl-reports
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_reports_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 9000, hostPort: 0, protocol: 'tcp'}
+          env: "{{ deploy.jangl_reports.env }}"
+          instances: 1
+          cpus: 0.3
+          mem: 1024
+          labels:
+            tags: "backend,uwsgi"
+            overrideTaskName: "reports"
+          fetch:
+            - uri: "file:///etc/docker.tar.gz"
+          healthChecks:
+            - protocol: "COMMAND"
+              command: "uwsgi --ping $HOST:$PORT0"
+              gracePeriodSeconds: 10
+              intervalSeconds: 15
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+      - name: jangl_reports_buyer_workers
+        app:
+          << : *marathon-app
+          id: reports/buyer-pingpost-workers
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_reports_buyer_worker_docker_image }}"
+          env: "{{ deploy.jangl_reports.env }}"
+          labels: {}
+          healthChecks: []
+
+      - name: jangl_reports_vendor_workers
+        app:
+          << : *marathon-app
+          id: reports/vendor-pingpost-workers
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_reports_vendor_worker_docker_image }}"
+          env: "{{ deploy.jangl_reports.env }}"
+          labels: {}
+          healthChecks: []
+
+      - name: jangl_reports_filter_workers
+        app:
+          << : *marathon-app
+          id: reports/unmatched-filter-workers
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_reports_filters_worker_docker_image }}"
+          env: "{{ deploy.jangl_reports.env }}"
+          labels: {}
+          healthChecks: []

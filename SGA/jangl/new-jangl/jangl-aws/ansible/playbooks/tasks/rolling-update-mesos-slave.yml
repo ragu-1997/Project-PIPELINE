@@ -1,0 +1,9 @@
+---
+- hosts: tag_Service_resource
+  become: yes
+  vars:
+    use_mesos_lvm: true
+  roles:
+    - lvm
+    - mesos
+  serial: 3

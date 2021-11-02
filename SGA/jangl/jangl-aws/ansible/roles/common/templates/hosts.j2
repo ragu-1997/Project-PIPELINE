@@ -1,0 +1,5 @@
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+{% for item in groups['all'] %}{% if hostvars[item].ec2_private_ip_address is defined and hostvars[item].ec2_tag_Name is defined %}
+{{ hostvars[item].ec2_private_ip_address }} {% if use_host_domain %}{{ hostvars[item].ec2_tag_Name }}.{{ host_domain }}{% endif %} {{ hostvars[item].ec2_tag_Name }}
+{% endif %}{% endfor %}

@@ -1,0 +1,16 @@
+---
+- name: restart fail2ban
+  become: yes
+  command: systemctl restart fail2ban
+
+- name: reload sysctl
+  become: yes
+  command: sysctl -p
+
+- name: restart journald
+  become: yes
+  command: systemctl restart systemd-journald
+
+- name: yum update cache
+  yum:
+    update_cache: yes

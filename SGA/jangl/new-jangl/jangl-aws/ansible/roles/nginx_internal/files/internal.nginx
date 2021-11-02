@@ -1,0 +1,67 @@
+
+{{with $node := node}}{{range services }}{{if (.Tags | contains "backend") }}
+  upstream {{.Name}} { {{range service .Name "any"}}{{if eq .Status "passing"}}
+    server {{.Address}}:{{.Port}};{{else}}
+    server {{.Address}}:{{.Port}} down;{{end}}{{end}}
+  }
+{{end}}{{end}}{{end}}
+
+  server {
+    listen 8008;
+    # log_by_lua "luameter.mark_by_path(1)";
+
+    location / {
+      return 200;
+    }
+
+{{range services }}{{if (.Tags | contains "backend") }}
+    location /{{.Name}}/ {
+    {{if (.Tags | contains "uwsgi") }}
+        include /etc/nginx/uwsgi_params;
+        uwsgi_param Host $host;
+        uwsgi_param X-Real-IP $remote_addr;
+        uwsgi_param X-Forwarded-For $proxy_add_x_forwarded_for;
+        uwsgi_param X-Forwarded-Proto $http_x_forwarded_proto;
+        uwsgi_param X-CID $http_x_cid;
+        uwsgi_param X-SITE-ID $http_x_site_id;
+        uwsgi_param SCRIPT_NAME /{{.Name}};
+        uwsgi_next_upstream error invalid_header;{{if (.Tags | contains "nomodify") }}{{else}}
+        uwsgi_modifier1 30;{{end}}
+        uwsgi_read_timeout 300s;
+        uwsgi_send_timeout 180s;
+
+        uwsgi_pass    {{.Name}};
+    {{end}}{{if (.Tags | contains "http") }}
+        rewrite ^/{{.Name}}(/.*)$ $1 break;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_set_header X-CID $http_x_cid;
+        proxy_set_header X-SITE-ID $http_x_site_id;
+        proxy_next_upstream error invalid_header;
+        proxy_read_timeout 300s;
+        proxy_send_timeout 180s;
+        proxy_buffering off;
+
+        proxy_pass http://{{.Name}};
+    {{end}}
+
+    }
+{{end}}{{end}}
+
+  }
+
+{{range services }}{{if (eq .Name "kafka-schema") }}
+  server {
+    listen 8081;
+    # log_by_lua "luameter.mark('kafka-schema')";
+    location / {
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+
+      proxy_pass http://{{.Name}};
+    }
+  }
+{{end}}{{end}}

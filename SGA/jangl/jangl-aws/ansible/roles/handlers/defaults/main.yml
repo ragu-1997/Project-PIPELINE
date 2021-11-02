@@ -1,0 +1,2 @@
+consul_bin: /bin/consul
+consul_dir: /etc/consul

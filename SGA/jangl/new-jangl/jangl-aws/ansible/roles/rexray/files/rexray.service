@@ -1,0 +1,16 @@
+[Unit]
+Description=rexray
+Before=docker.service
+StartLimitInterval=200
+StartLimitBurst=5
+
+[Service]
+EnvironmentFile=/etc/rexray/rexray.env
+ExecStart=/usr/bin/rexray start
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=always
+RestartSec=20
+
+[Install]
+WantedBy=docker.service

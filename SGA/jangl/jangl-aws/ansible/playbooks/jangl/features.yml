@@ -1,0 +1,34 @@
+---
+- hosts: tag_Service_resource
+  roles:
+    - marathon_deploy
+  vars:
+    jangl_platform_graph_docker_image: "docker.jangl.com/jangl-platform-graph:{{ jangl_platform_graph_version | default('latest') }}"
+
+    marathon_apps:
+      - name: jangl_platform_graph
+        app: &marathon-app
+          id: features/platform-graph
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_platform_graph_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 8000, hostPort: 0, protocol: 'tcp'}
+          env: "{{ deploy.jangl_platform_graph.env }}"
+          instances: 1
+          cpus: 0.3
+          mem: 1024
+          labels:
+            tags: "backend,http"
+            overrideTaskName: "platform-graph"
+          fetch:
+            - uri: "file:///etc/docker.tar.gz"
+          healthChecks:
+            - protocol: "MESOS_HTTP"
+              path: "/_hc"
+              gracePeriodSeconds: 10
+              intervalSeconds: 15
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3

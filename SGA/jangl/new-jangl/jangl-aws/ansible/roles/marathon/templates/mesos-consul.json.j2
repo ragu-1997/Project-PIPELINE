@@ -1,0 +1,25 @@
+{
+  "args": [
+    "--zk={{ mesos_zookeeper_masters }}",
+    "--mesos-ip-order=mesos,host",
+    "--refresh={{ mesos_consul_refresh }}"
+  ],
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "network": "BRIDGE",
+      "image": "{{ mesos_consul_image }}:{{ mesos_consul_image_tag }}"
+    }
+  },
+  "labels": {
+      "traefik.enable": "false"
+  },
+  "unreachableStrategy": {
+    "inactiveAfter": "0",
+    "expungeAfter": "0"
+  },
+  "id": "mesos-consul",
+  "instances": 1,
+  "cpus": 0.1,
+  "mem": 128
+}

@@ -1,0 +1,71 @@
+---
+- hosts: tag_Service_resource
+  roles:
+    - marathon_deploy
+    - chronos_deploy
+  vars:
+    jangl_calls_docker_image: "docker.jangl.com/jangl-calls-api:{{ jangl_calls_version | default('latest') }}"
+
+    marathon_apps:
+      - name: jangl_calls
+        app: &marathon-app
+          id: calls/jangl-calls
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_calls_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 8000, hostPort: 0, protocol: 'tcp'}
+          env: "{{ deploy.jangl_calls.env | combine({'MOUNT_BACKEND_ROUTES': 'True'}) }}"
+          instances: 1
+          cpus: 0.5
+          mem: 1024
+          labels:
+            tags: "backend,http"
+            overrideTaskName: "calls"
+          fetch:
+            - uri: "file:///etc/docker.tar.gz"
+          healthChecks:
+            - protocol: "MESOS_HTTP"
+              gracePeriodSeconds: 10
+              intervalSeconds: 15
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+      - name: jangl_calls_api
+        app:
+          << : *marathon-app
+          id: calls/calls-api
+          env: "{{ deploy.jangl_calls.env | combine({'MOUNT_EXTERNAL_ROUTES': 'True'}) }}"
+          labels:
+            tags: "external,http"
+            overrideTaskName: "calls-api"
+
+      - name: jangl_calls_test_api
+        app:
+          << : *marathon-app
+          id: calls/calls-test-api
+          env: "{{ deploy.jangl_calls.env | combine({'MOUNT_EXTERNAL_ROUTES': 'True', 'TEST_API': 'True'}) }}"
+          labels:
+            tags: "external,http"
+            overrideTaskName: "calls-test-api"
+
+    migrate_commands:
+      - name: Migrate Calls DB
+        image: "{{ jangl_calls_docker_image }}"
+        command: "db:migrate"
+        env: "{{ deploy.jangl_calls.env }}"
+
+    chronos_jobs:
+      - name: jangl-calls-api-update_inbound_calls
+        command: "./Taskfile command update_inbound_calls"
+        docker_image: "{{ jangl_calls_docker_image }}"
+        env: "{{ deploy.jangl_calls.env | chronos_env }}"
+        start_time: "2020-01-01T00:00:00Z"
+        run_interval: PT5M
+        shell: true
+        cpus: 0.5
+        disk: 1024
+        mem: 2048
+        epsilon: PT4M

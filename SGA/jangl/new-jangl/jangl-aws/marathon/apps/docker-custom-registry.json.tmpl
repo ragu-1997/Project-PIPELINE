@@ -1,0 +1,16 @@
+{
+  "id": "docker-custom-registry",
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "<image name>",
+      "network": "BRIDGE",
+      "portMappings": [
+        {"containerPort": 8080, "protocol": "tcp"}
+      ]
+    }
+  },
+  "env": {
+    "SERVE_PORT": "8080"
+  }
+}

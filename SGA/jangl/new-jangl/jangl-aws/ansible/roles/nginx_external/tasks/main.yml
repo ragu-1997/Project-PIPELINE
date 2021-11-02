@@ -1,0 +1,21 @@
+---
+
+- name: copy nginx configuration
+  become: yes
+  copy:
+    src: external.nginx
+    dest: /etc/nginx/templates
+  notify:
+    - reload nginx-consul
+  tags:
+    - nginx_external
+
+- name: copy nginx passwords
+  become: yes
+  copy:
+    src: htpasswd
+    dest: /etc/nginx/.htpasswd
+  notify:
+    - reload nginx-consul
+  tags:
+    - nginx_external

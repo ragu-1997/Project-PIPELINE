@@ -1,0 +1,6 @@
+---
+lvm_volume_group_name: mantl
+uses_lvm: False
+lvm_physical_device: /dev/xvdh
+
+debug_storage_setup: True

@@ -1,0 +1,34 @@
+---
+- name: Create logspout config dir
+  file:
+    path: "{{logspout_conf_dir}}"
+    state: directory
+    mode: 755
+  tags:
+    - logspout_kafka
+
+- name: create docker route
+  template:
+    src: "docker.json.j2"
+    dest: "{{logspout_conf_dir}}/docker.json"
+    mode: 644
+  tags:
+    - logspout_kafka
+
+- name: deploy logspout service
+  template:
+   src: "logspout.service.j2"
+   dest: "/usr/lib/systemd/system/{{logspout_service_name}}.service"
+  notify:
+    - reload systemd
+    - restart logspout
+  tags:
+    - logspout_kafka
+
+- name: enable logspout
+  service:
+    name: "{{logspout_service_name}}"
+    enabled: yes
+    state: started
+  tags:
+    - logspout_kafka

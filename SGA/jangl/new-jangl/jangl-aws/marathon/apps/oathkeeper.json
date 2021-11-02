@@ -1,0 +1,72 @@
+{
+  "id": "/auth/oathkeeper",
+  "cpus": 1,
+  "mem": 1024,
+  "instances": 1,
+  "args": [
+    "serve"
+  ],
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "forcePullImage": false,
+      "image": "oryd/oathkeeper:v0.19.0",
+      "parameters": [],
+      "privileged": false
+    },
+    "portMappings": [
+      {
+        "containerPort": 4455,
+        "hostPort": 0,
+        "protocol": "tcp"
+      },
+      {
+        "containerPort": 4456,
+        "hostPort": 0,
+        "protocol": "tcp"
+      }
+    ]
+  },
+  "env": {
+    "SERVE_PROXY_PORT": "4455",
+    "SERVE_API_PORT": "4456",
+    "SERVE_API_CORS_ENABLED": "true",
+    "SERVE_API_CORS_ALLOWED_METHODS": "POST,GET,PUT,DELETE",
+    "ACCESS_RULES_REPOSITORIES": "inline://W3siaWQiOiJhbGxvdy1hbm9ueW1vdXMtd2l0aC1pZC10b2tlbi1tdXRhdG9yIiwidXBzdHJlYW0iOnsidXJsIjoiaHR0cHM6Ly9odHRwYmluLm9yZy9hbnl0aGluZy9pZF90b2tlbiIsInN0cmlwX3BhdGgiOiIvdGVzdC9pZF90b2tlbiJ9LCJtYXRjaCI6eyJ1cmwiOiI8Lio+L3Rlc3QvaWRfdG9rZW4iLCJtZXRob2RzIjpbIkdFVCJdfSwiYXV0aGVudGljYXRvcnMiOlt7ImhhbmRsZXIiOiJhbm9ueW1vdXMifSx7ImhhbmRsZXIiOiJvYXV0aDJfaW50cm9zcGVjdGlvbiJ9XSwiYXV0aG9yaXplciI6eyJoYW5kbGVyIjoiYWxsb3cifSwibXV0YXRvcnMiOlt7ImhhbmRsZXIiOiJpZF90b2tlbiIsImNvbmZpZyI6eyJpc3N1ZXJfdXJsIjoiaHR0cHM6Ly9zeXN0ZW0uamFuZ2wuY29tLyIsImp3a3NfdXJsIjoiaHR0cDovL2FnZW50Lm1lc29zLnNlcnZpY2UuY29uc3VsOjgwMDgvaHlkcmEtYWRtaW4va2V5cy9vYXRoa2VlcGVyIn19LHsiaGFuZGxlciI6ImhlYWRlciIsImNvbmZpZyI6eyJoZWFkZXJzIjp7IlgtQXV0aC1BY2NvdW50Ijoie3sgcHJpbnQgLkV4dHJhLmFjY291bnQgfX0iLCJYLVNpdGUtSUQiOiJ7eyBwcmludCAuRXh0cmEuc2l0ZV9pZCB9fSJ9fX1dfSx7ImlkIjoiamFuZ2wtZGRwLXdlYmxlYWRzIiwidXBzdHJlYW0iOnsidXJsIjoiaHR0cDovL2FnZW50Lm1lc29zLnNlcnZpY2UuY29uc3VsOjgwMDgvZGlzcG9zaXRpb24vdjEvZGlzcG9zaXRpb24vd2VibGVhZHMiLCJwcmVzZXJ2ZV9ob3N0Ijp0cnVlLCJzdHJpcF9wYXRoIjoiL3YxL2Rpc3Bvc2l0aW9uL3dlYmxlYWRzIn0sIm1hdGNoIjp7InVybCI6IjwuKj4vdjEvZGlzcG9zaXRpb24vd2VibGVhZHMiLCJtZXRob2RzIjpbIlBPU1QiXX0sImF1dGhlbnRpY2F0b3JzIjpbeyJoYW5kbGVyIjoib2F1dGgyX2ludHJvc3BlY3Rpb24iLCJjb25maWciOnsicmVxdWlyZWRfc2NvcGUiOlsid2VibGVhZHMuZGRwIl19fV0sImF1dGhvcml6ZXIiOnsiaGFuZGxlciI6ImFsbG93In0sIm11dGF0b3JzIjpbeyJoYW5kbGVyIjoiaWRfdG9rZW4iLCJjb25maWciOnsiaXNzdWVyX3VybCI6Imh0dHBzOi8vc3lzdGVtLmphbmdsLmNvbS8iLCJqd2tzX3VybCI6Imh0dHA6Ly9hZ2VudC5tZXNvcy5zZXJ2aWNlLmNvbnN1bDo4MDA4L2h5ZHJhLWFkbWluL2tleXMvb2F0aGtlZXBlciJ9fSx7ImhhbmRsZXIiOiJoZWFkZXIiLCJjb25maWciOnsiaGVhZGVycyI6eyJYLUF1dGgtQWNjb3VudCI6Int7IHByaW50IC5FeHRyYS5hY2NvdW50IH19IiwiWC1TaXRlLUlEIjoie3sgcHJpbnQgLkV4dHJhLnNpdGVfaWQgfX0ifX19XX1d",
+    "AUTHENTICATORS_ANONYMOUS_ENABLED": "true",
+    "AUTHENTICATORS_ANONYMOUS_SUBJECT": "anonymous",
+    "AUTHENTICATORS_OAUTH2_INTROSPECTION_ENABLED": "true",
+    "AUTHENTICATORS_OAUTH2_INTROSPECTION_INTROSPECTION_URL": "http://agent.mesos.service.consul:8008/hydra-admin/oauth2/introspect",
+    "AUTHENTICATORS_OAUTH2_INTROSPECTION_PRE_AUTHORIZATION_ENABLED": "false",
+    "AUTHENTICATORS_OAUTH2_CLIENT_CREDENTIALS_ENABLED": "true",
+    "AUTHENTICATORS_OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL": "https://oauth.jangl.com/oauth2/token",
+    "AUTHORIZERS_ALLOW_ENABLED": "true",
+    "AUTHORIZERS_DENY_ENABLED": "true",
+    "MUTATORS_NOOP_ENABLED": "true",
+    "MUTATORS_HEADER_ENABLED": "true",
+    "MUTATORS_ID_TOKEN_ENABLED": "true",
+    "MUTATORS_ID_TOKEN_CONFIG_ISSUER_URL": "https://system.jangl.com/",
+    "MUTATORS_ID_TOKEN_CONFIG_JWKS_URL": "http://agent.mesos.service.consul:8008/hydra-admin/keys/oathkeeper"
+  },
+  "healthChecks": [
+    {
+      "gracePeriodSeconds": 15,
+      "intervalSeconds": 60,
+      "maxConsecutiveFailures": 3,
+      "path": "/health/ready",
+      "portIndex": 1,
+      "protocol": "MESOS_HTTP",
+      "timeoutSeconds": 20,
+      "delaySeconds": 15
+    }
+  ],
+  "labels": {
+    "overrideTaskName": "system",
+    "tags": "external,http"
+  },
+  "networks": [
+    {
+      "mode": "container/bridge"
+    }
+  ]
+}

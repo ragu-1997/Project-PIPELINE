@@ -1,0 +1,26 @@
+{
+  "id": "hydra",
+  "cpus": 1,
+  "mem": 1024,
+  "instances": 1,
+  "container":{
+    "type" : "DOCKER",
+    "docker": {
+      "image" : "oryd/hydra:v0.11.12",
+      "forcePullImage": true,
+      "network": "HOST"
+    }
+  },
+  "ports": [0],
+  "labels": {
+      "tags": "external,http",
+      "overrideTaskName": "hydra"
+  },
+  "env": {
+    "DATABASE_URL": "postgres://jangl_hydra:DB8gLvJoF4BW@jangl-hydra.cewygxfcbvsc.us-east-1.rds.amazonaws.com:5432/jangl_hydra",
+    "SYSTEM_SECRET": "7FKQ3JrR@Ms8E0j9^h*HbIYUxy23Cnw^#*3tFaDY2rVt8Q7j8aemwIN#yb#$&Ez2",
+    "ISSUER": "https://hydra.jangl.com/",
+    "CONSENT_URL": "https://login.jangl.dev/consent/",
+    "HTTPS_ALLOW_TERMINATION_FROM": "10.128.0.0/16"
+  }
+}

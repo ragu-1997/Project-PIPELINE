@@ -1,0 +1,6 @@
+---
+- name: restart consul
+  become: yes
+  command: /usr/local/bin/consul-rolling-restart.sh
+  notify:
+    - wait for consul to listen

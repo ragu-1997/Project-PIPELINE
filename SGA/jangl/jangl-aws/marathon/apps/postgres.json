@@ -1,0 +1,44 @@
+{
+    "id": "/postgres",
+    "apps": [{
+        "id": "/postgres/track-changes",
+        "instances": 1,
+        "cpus": 1,
+        "mem": 1024,
+        "container": {
+          "type": "DOCKER",
+          "docker": {
+            "image": "postgres:9.6",
+            "network": "BRIDGE",
+            "portMappings": [{"containerPort": 5432, "hostPort": 5444, "protocol": "tcp"}],
+            "parameters": [{
+                "key": "volume-driver",
+                "value": "rexray"
+            }, {
+                "key": "volume",
+                "value": "track-changes-slack-postgres:/var/lib/postgresql/data"
+            }]
+          }
+        },
+        "env": {
+            "POSTGRES_USER": "jangl_track_changes",
+            "POSTGRES_PASSWORD": "EaeI49iXZ5t5"
+        },
+        "labels":{
+            "MARATHON_SINGLE_INSTANCE_APP": "true"
+        },
+        "requirePorts" : true,
+        "healthChecks": [{
+            "protocol": "TCP",
+            "gracePeriodSeconds": 60,
+            "intervalSeconds": 5,
+            "portIndex": 0,
+            "timeoutSeconds": 5,
+            "maxConsecutiveFailures": 3
+        }],
+        "upgradeStrategy":{
+            "minimumHealthCapacity": 0,
+            "maximumOverCapacity": 0
+        }
+    }]
+}

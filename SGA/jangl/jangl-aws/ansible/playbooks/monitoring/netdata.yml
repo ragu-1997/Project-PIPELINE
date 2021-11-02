@@ -1,0 +1,6 @@
+---
+- hosts: all
+  become: yes
+  serial: 20
+  roles:
+    - netdata

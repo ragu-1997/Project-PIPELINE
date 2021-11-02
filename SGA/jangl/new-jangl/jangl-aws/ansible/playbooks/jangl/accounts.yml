@@ -1,0 +1,62 @@
+---
+- hosts: tag_Service_resource
+  roles:
+    - marathon_deploy
+  vars:
+    jangl_accounts_docker_image: "docker.jangl.com/jangl-accounts:{{ jangl_accounts_version | default('latest') }}"
+    jangl_prefs_docker_image: "docker.jangl.com/jangl-prefs:{{ jangl_prefs_version | default('latest') }}"
+
+    marathon_apps:
+      - name: jangl_accounts
+        app: &marathon-app
+          id: accounts/jangl-accounts
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_accounts_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 9000, hostPort: 0, protocol: 'tcp'}
+          env: "{{ deploy.jangl_accounts.env }}"
+          instances: 1
+          cpus: 0.3
+          mem: 1024
+          labels:
+            tags: "backend,uwsgi"
+            overrideTaskName: "accounts"
+          fetch:
+            - uri: "file:///etc/docker.tar.gz"
+          healthChecks:
+            - protocol: "COMMAND"
+              command: "uwsgi --ping $HOST:$PORT0"
+              gracePeriodSeconds: 10
+              intervalSeconds: 15
+              timeoutSeconds: 5
+              maxConsecutiveFailures: 3
+
+      - name: jangl_prefs
+        app:
+          << : *marathon-app
+          id: accounts/jangl-prefs
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ jangl_prefs_docker_image }}"
+              network: "BRIDGE"
+              portMappings:
+                - {containerPort: 9000, hostPort: 0, protocol: 'tcp'}
+          env: "{{ deploy.jangl_prefs.env }}"
+          labels:
+            tags: "backend,uwsgi"
+            overrideTaskName: "prefs"
+
+    migrate_commands:
+      - name: Migrate Accounts DB
+        image: "{{ jangl_accounts_docker_image }}"
+        command: "./manage.py migrate --database=default"
+        env: "{{ deploy.jangl_accounts.env }}"
+
+      - name: Migrate Prefs DB
+        image: "{{ jangl_prefs_docker_image }}"
+        command: "./manage.py update_prefs_n_perms"
+        env: "{{ deploy.jangl_prefs.env }}"

@@ -1,0 +1,32 @@
+{
+  "id": "kafka-connect",
+  "cpus": 1,
+  "mem": 6144,
+  "instances": 3,
+  "container":{
+    "type" : "DOCKER",
+    "docker": {
+      "image" : "confluentinc/cp-kafka-connect:5.0.0",
+      "forcePullImage": true,
+      "network": "BRIDGE",
+      "portMappings": [
+        {"containerPort": 8083, "protocol": "tcp"}
+      ]
+    }
+  },
+  "env": {
+    "CONNECT_BOOTSTRAP_SERVERS": "kafka-new.service.consul:9092",
+    "CONNECT_GROUP_ID": "compose-connect-group",
+    "CONNECT_CONFIG_STORAGE_TOPIC": "__connect-config",
+    "CONNECT_OFFSET_STORAGE_TOPIC": "__connect-offsets",
+    "CONNECT_STATUS_STORAGE_TOPIC": "__connect-status",
+    "CONNECT_KEY_CONVERTER": "io.confluent.connect.avro.AvroConverter",
+    "CONNECT_VALUE_CONVERTER": "io.confluent.connect.avro.AvroConverter",
+    "CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL": "http://agent.mesos.service.consul:8008/kafka-schema-new/",
+    "CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL": "http://agent.mesos.service.consul:8008/kafka-schema-new/",
+    "CONNECT_INTERNAL_KEY_CONVERTER": "org.apache.kafka.connect.json.JsonConverter",
+    "CONNECT_INTERNAL_VALUE_CONVERTER": "org.apache.kafka.connect.json.JsonConverter",
+    "CONNECT_PLUGIN_PATH": "/usr/share/java",
+    "KAFKA_HEAP_OPTS": "-Xmx3G"
+  }
+}

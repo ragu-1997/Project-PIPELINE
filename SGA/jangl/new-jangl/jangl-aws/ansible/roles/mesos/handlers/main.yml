@@ -1,0 +1,30 @@
+---
+# While waiting for https://github.com/ansible/ansible-modules-core/issues/191
+- name: Reload daemon
+  command: systemctl daemon-reload
+  when: ansible_service_mgr == 'systemd'
+
+- name: Remove existing slave tasks
+  command: pkill -USR1 mesos-slave
+  ignore_errors: yes
+  when:
+    - mesos_install_mode == "slave" or mesos_install_mode == "master-slave"
+    - mesos_agent_remove_tasks
+
+- name: Cleanup meta/slaves/latest
+  file: path="{{item}}" state=absent
+  when:
+    - mesos_install_mode == "slave" or mesos_install_mode == "master-slave"
+    - mesos_agent_meta_cleanup
+  with_items:
+    - "{{mesos_work_dir}}/meta/slaves"
+    - "{{mesos_work_dir}}/slaves"
+
+# i.e. upgrade mesos, templates stay the same...
+- name: Restart mesos-master
+  service: name=mesos-master state=restarted
+  when: mesos_install_mode == "master" or mesos_install_mode == "master-slave"
+
+- name: Restart mesos-slave
+  service: name=mesos-slave state=restarted
+  when: mesos_install_mode == "slave" or mesos_install_mode == "master-slave"

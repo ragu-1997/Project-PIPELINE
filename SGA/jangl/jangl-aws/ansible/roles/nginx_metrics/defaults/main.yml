@@ -1,0 +1,6 @@
+---
+nginx_metrics_service_name: "nginx-metrics"
+nginx_metrics_docker_image: "docker.jangl.com/nginx-luameter-metrics"
+nginx_metrics_influx_dsn: "influxdb://influxdb.service.consul:8086/nginx"
+nginx_metrics_env_vars: []
+# nginx_metrics_env_vars: [{name: "SERVICE_NAME", value: "nginx"}]

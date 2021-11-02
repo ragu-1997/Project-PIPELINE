@@ -1,0 +1,8 @@
+---
+use_host_domain: true
+host_domain: node.dc1.consul
+selinux_policy: targeted
+selinux_state: permissive
+
+sysctl_min_free_kbytes: "135168"
+sysctl_max_map_count: "262144"

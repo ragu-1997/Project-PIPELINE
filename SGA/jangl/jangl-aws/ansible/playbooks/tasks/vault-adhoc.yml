@@ -1,0 +1,5 @@
+---
+- hosts: tag_Service_resource
+  become: yes
+  roles:
+    - vault_role

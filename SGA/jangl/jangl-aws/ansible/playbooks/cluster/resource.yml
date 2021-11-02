@@ -1,0 +1,17 @@
+---
+- hosts: tag_Service_resource
+  become: yes
+  vars:
+    uses_lvm: true
+    use_mesos_lvm: true
+  roles:
+    - consul
+    - dnsmasq
+    - lvm
+    - swap
+    - docker
+    - rexray
+    - nginx
+    - nginx_internal
+    - pgbouncer
+    - mesos

@@ -1,0 +1,20 @@
+---
+- name: "creating filesystem for /dev/xvd{{letter}}"
+  filesystem: fstype=ext4 dev="/dev/xvd{{letter}}"
+
+- name: "creating directory /mnt/data-{{letter}}"
+  file: path="/mnt/data-{{letter}}" state=directory mode=0777
+
+- name: "mounting /dev/xvd{{letter}} to /mnt/data-{{letter}}"
+  mount: name="/mnt/data-{{letter}}" src="/dev/xvd{{letter}}" fstype=ext4 opts=defaults state=mounted passno=2
+  register: mount_drive
+
+- name: "make directory /mnt/data-{{letter}} writable"
+  file: path="/mnt/data-{{letter}}" state=directory mode=0777
+
+- name: "empty /mnt/data-{{letter}} if remounted"
+  command: "rm -rf /mnt/data-{{letter}}/*"
+  when: mount_drive.changed
+
+- name: "remove lost+found in /mnt/data-{{letter}}"
+  file: path="/mnt/data-{{letter}}/lost+found/" state=absent

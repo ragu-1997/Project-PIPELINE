@@ -1,0 +1,32 @@
+[Unit]
+Description=nginx-consul
+After=docker.service
+Requires=docker.service
+StartLimitInterval=200
+StartLimitBurst=5
+
+[Service]
+Restart=always
+RestartSec=20
+
+ExecStartPre=-/usr/bin/docker rm -f nginx-consul
+ExecStartPre=-/usr/bin/docker pull {{ consul_nginx_image }}:{{ consul_nginx_image_tag }}
+
+ExecStart=/usr/bin/docker run \
+    --rm \
+    --name=nginx-consul \
+    --net=host \
+    --privileged=true \
+    --volume=/etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+    --volume=/etc/nginx/.htpasswd:/etc/nginx/.htpasswd:ro \
+    --volume=/etc/nginx/templates:/etc/nginx/templates:ro \
+    --volume=/etc/nginx/luameter:/opt/luameter:ro \
+    --env-file=/etc/default/nginx-consul.env \
+    {{ consul_nginx_image }}:{{ consul_nginx_image_tag }}
+
+ExecStop=/usr/bin/docker kill nginx-consul
+
+ExecReload=/usr/bin/docker kill -s SIGHUP nginx-consul
+
+[Install]
+WantedBy=default.target

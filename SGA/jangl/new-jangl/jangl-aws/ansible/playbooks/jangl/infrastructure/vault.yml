@@ -1,0 +1,81 @@
+---
+- hosts: tag_Service_resource
+  vars:
+    vault_docker_image: "vault:1.5.4"
+    vault_service_url: "http://vault-auth.service.consul:8200"
+    vault_server_config:
+      storage:
+        consul:
+          address: "consul.service.consul:8500"
+          path: "vault/"
+      listener:
+        tcp:
+          address: "0.0.0.0:8200"
+          tls_disable: true
+      seal:
+        awskms:
+          region: "us-east-1"
+          kms_key_id: "{{ ansible_env.VAULT_KMS_UNSEAL_KEY }}"
+      ui: true
+    marathon_apps:
+      - app:
+          id: "auth/vault"
+          instances: 1
+          cpus: 0.5
+          mem: 1024
+          container:
+            type: "DOCKER"
+            docker:
+              image: "{{ vault_docker_image }}"
+              network: "HOST"
+              parameters:
+                - {key: 'cap-add', value: 'IPC_LOCK'}
+          args: ["vault", "server", "-config=/vault/config"]
+          ports: [8200]
+          env:
+            VAULT_REDIRECT_INTERFACE: ens3
+            VAULT_CLUSTER_INTERFACE: ens3
+            VAULT_LOCAL_CONFIG: "{{ vault_server_config|to_json }}"
+  tasks:
+    - name: deploy server to marathon
+      include_role:
+        name: marathon_deploy
+
+    - name: wait
+      pause:
+        seconds: 10
+
+    - name: Initialize Vault operator
+      run_once: true
+      docker_container:
+        name: "vault-init"
+        image: "{{ vault_docker_image }}"
+        command: "vault operator init -recovery-shares=1 -recovery-threshold=1 -format json"
+        env:
+          VAULT_ADDR: "{{ vault_service_url }}"
+        capabilities:
+          - ipc_lock
+        state: started
+        detach: False
+        cleanup: True
+      register: vault_init_results
+
+    - name: Parse output of Vault init
+      run_once: true
+      set_fact:
+        vault_init_parsed: "{{ vault_init_results.container.Output | from_json }}"
+
+    - name: Load Vault init keys
+      run_once: true
+      set_fact:
+        vault_recovery_keys: "{{ vault_init_parsed.recovery_keys_hex }}"
+        vault_root_token: "{{ vault_init_parsed.root_token }}"
+
+    - name: Display Recovery keys
+      run_once: true
+      debug: msg="Recovery Key - {{ item }}"
+      loop: "{{ vault_recovery_keys }}"
+
+    - name: Display root token
+      run_once: true
+      debug: msg="Root Token - {{ vault_root_token }}"

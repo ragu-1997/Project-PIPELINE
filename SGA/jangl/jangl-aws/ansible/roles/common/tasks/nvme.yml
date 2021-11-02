@@ -1,0 +1,26 @@
+---
+
+- name: install nvme cli
+  become: yes
+  yum:
+    name: nvme-cli
+    state: latest
+
+- name: add nvme mapping script
+  copy:
+    src: ebs-nvme-mapping
+    dest: /usr/local/bin/ebs-nvme-mapping
+    mode: 0755
+
+- name: add nvme udev rule
+  copy:
+    src: ebs-nvme-udev.rules
+    dest: /etc/udev/rules.d/999-aws-ebs-nvme.rules
+
+- name: udev reload rules
+  become: yes
+  command: udevadm control --reload-rules
+
+- name: udev reload trigger
+  become: yes
+  command: udevadm trigger

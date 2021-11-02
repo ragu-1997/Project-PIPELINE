@@ -1,0 +1,29 @@
+[Unit]
+Description={{ logspout_service_name }}
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=on-failure
+RestartSec=20
+TimeoutStartSec=0
+
+ExecStartPre=-/usr/bin/docker rm -f {{ logspout_service_name }}
+ExecStartPre=-/usr/bin/docker pull {{ logspout_docker_image }}
+
+ExecStart=/usr/bin/docker run \
+    --name={{ logspout_service_name }} \
+    --net=host \
+    --restart=always \
+    --volume=/var/run/docker.sock:/tmp/docker.sock:ro \
+    --volume={{ logspout_conf_dir }}:/mnt/routes:ro \
+    --env PORT={{ logspout_port }} \
+    --env BACKLOG=false \
+    {{ logspout_docker_image }}
+
+ExecStop=/usr/bin/docker kill {{ logspout_service_name }}
+
+ExecReload=/usr/bin/docker kill -s SIGHUP {{ logspout_service_name }}
+
+[Install]
+WantedBy=multi-user.target

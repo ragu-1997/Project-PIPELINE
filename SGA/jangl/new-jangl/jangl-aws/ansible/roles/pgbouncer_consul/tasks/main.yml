@@ -1,0 +1,37 @@
+---
+
+- include: remove_old.yml
+  tags:
+    - pgbouncer_consul
+
+- name: Create folders
+  file:
+    path: "{{pgbouncer_consul_dir}}"
+    state: directory
+
+- name: copy pgbouncer-consul template
+  copy:
+    src: pgbouncer.ini.template
+    dest: "{{pgbouncer_consul_dir}}"
+  notify:
+    - restart pgbouncer-consul
+
+- name: deploy pgbouncer-consul service
+  template:
+   src: "pgbouncer-consul.service.j2"
+   dest: "/usr/lib/systemd/system/{{pgbouncer_consul_service_name}}.service"
+  notify:
+    - reload systemd
+    - restart pgbouncer-consul
+  tags:
+    - pgbouncer_consul
+
+- name: enable pgbouncer-consul
+  service:
+    name: "{{pgbouncer_consul_service_name}}"
+    enabled: yes
+    state: started
+  tags:
+    - pgbouncer_consul
+
+- meta: flush_handlers
