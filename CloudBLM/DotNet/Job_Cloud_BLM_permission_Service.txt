@@ -1,0 +1,54 @@
+node('master') {
+    try {
+    	def dotnet = '/usr/bin/dotnet'
+    	stage('Checkout') {
+    	 cleanWs()
+    	 checkout([$class: 'SubversionSCM', 
+    		additionalCredentials: [], 
+    		excludedCommitMessages: '', 
+    		excludedRegions: '', 
+    		excludedRevprop: '', 
+    		excludedUsers: '', 
+    		filterChangelog: false, 
+    		ignoreDirPropChanges: false, 
+    		includedRegions: '', 
+    		locations: [[cancelProcessOnExternalsFail: true, 
+    		credentialsId: 'JPV', depthOption: 'infinity', 
+    		ignoreExternalsOption: true, local: '.', 
+    		remote: 'https://192.168.1.200/svn/api/Products/Cloud BLM/Application/branches/Experimental branch/BackEnd Services- Unified Database/CloudBLM-PermissionService']], 
+    		quietOperation: true, 
+    		workspaceUpdater: [$class: 'UpdateUpdater']])
+    	}
+    			stage('Remove obj') {
+    		sh label: '', script: 'rm -rf */obj'
+    	}
+    		stage('Clean') {
+    		sh label: '', script: 'dotnet clean'
+    	}
+    	stage('Build') {
+    		sh label: '', script: 'dotnet build --configuration Release'
+    	}
+    	stage('Stop Service') {
+    		sh label: '', script: 'sudo systemctl stop cloudblm-permission-service.service'
+    	}
+    	stage('Publish') {
+    		sh label: '', script: 'sudo dotnet publish -c Release --output /opt/apps/PermissionService'
+    	}
+    	stage('Start Service') {
+    		sh label: '', script: 'sudo systemctl start cloudblm-permission-service.service'
+    	}
+        currentBuild.result = 'SUCCESS'
+    } catch (Exception err) {
+        currentBuild.result = 'FAILURE'
+    }
+    stage('Notify') {
+        if(currentBuild.result == 'FAILURE') {
+            emailext (
+              subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${currentBuild.currentResult}", 
+              body: '''${SCRIPT, template="mail.template"}''',
+              recipientProviders: [developers()],
+              to: "prasannavenkatesan@srinsofttech.com", "kartikraja.subramanian@srinsofttech.com"
+            )
+        }
+    }	
+}
