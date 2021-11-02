@@ -1,0 +1,8 @@
+---
+- hosts: windows
+  tasks:
+ 
+    - name: Stop iis email Service
+      win_iis_website:
+        name: EmailService
+        state: stopped

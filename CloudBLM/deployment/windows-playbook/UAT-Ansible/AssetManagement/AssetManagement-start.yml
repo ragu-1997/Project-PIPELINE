@@ -1,0 +1,8 @@
+---
+- hosts: windows
+  tasks:
+
+    - name: Start iis assetmanagement service
+      win_iis_website:
+        name: AssetManagement
+        state: started

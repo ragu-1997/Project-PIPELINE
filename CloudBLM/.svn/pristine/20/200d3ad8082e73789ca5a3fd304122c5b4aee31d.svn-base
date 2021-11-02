@@ -1,0 +1,8 @@
+---
+- hosts: windows
+  tasks:
+ 
+    - name: Start iis email service
+      win_iis_website:
+        name: EmailService
+        state: started

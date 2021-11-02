@@ -1,0 +1,8 @@
+---
+- hosts: windows
+  tasks:
+ 
+    - name: Start iis NWC Service
+      win_iis_website:
+        name: NWC-Siemens
+        state: started

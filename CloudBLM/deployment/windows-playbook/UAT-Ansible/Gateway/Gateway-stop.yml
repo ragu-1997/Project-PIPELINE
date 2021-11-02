@@ -1,0 +1,8 @@
+---
+- hosts: windows
+  tasks:
+ 
+    - name: Stop iis Gateway Service
+      win_iis_website:
+        name: GatewayService
+        state: stopped
