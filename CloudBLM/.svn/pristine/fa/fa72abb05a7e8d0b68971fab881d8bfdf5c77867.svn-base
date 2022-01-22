@@ -1,8 +1,0 @@
----
-- hosts: windows
-  tasks:
- 
-    - name: Stop iis Export Service
-      win_iis_website:
-        name: IFC Export-Siemens
-        state: stopped

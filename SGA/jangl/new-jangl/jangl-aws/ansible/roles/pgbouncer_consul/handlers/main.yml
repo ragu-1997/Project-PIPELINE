@@ -1,5 +1,0 @@
----
-- name: restart pgbouncer-consul
-  service:
-    name: "{{pgbouncer_consul_service_name}}"
-    state: restarted

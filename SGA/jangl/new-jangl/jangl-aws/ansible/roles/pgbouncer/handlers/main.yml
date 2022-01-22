@@ -1,7 +1,0 @@
----
-- name: reload pgbouncer
-  service: name=pgbouncer state=reloaded
-  ignore_errors: True
-- name: restart pgbouncer
-  service: name=pgbouncer state=restarted
-  ignore_errors: True

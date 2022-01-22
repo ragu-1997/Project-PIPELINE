@@ -1,3 +1,0 @@
----
-- name: reload lvm config
-  command: "/usr/bin/mantl-storage-setup"

@@ -1,5 +1,0 @@
----
-- name: restart nginx_metrics
-  service:
-    name: "{{nginx_metrics_service_name}}"
-    state: restarted

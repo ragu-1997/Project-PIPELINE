@@ -1,8 +1,0 @@
----
-- hosts: windows
-  tasks:
- 
-    - name: Acme IIS site
-      win_iis_website:
-        name: NWC-Siemens
-        state: stopped

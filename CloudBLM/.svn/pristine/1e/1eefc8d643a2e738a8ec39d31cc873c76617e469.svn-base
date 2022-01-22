@@ -1,8 +1,0 @@
----
-- hosts: windows
-  tasks:
- 
-    - name: Start iis Role Service
-      win_iis_website:
-        name: RoleManagement
-        state: started

@@ -1,6 +1,0 @@
-# Maintained by Ansible
-{% for key, value in zookeeper.properties.items() %}
-{{key}}={{value}}
-{% endfor %}
-{% for host in groups[zookeeper_server_group] %}server.{{ hostvars[host]['zookeeper_id'] | default(groups[zookeeper_server_group].index(host) + 1)}}={{ host }}:2888:3888
-{% endfor %}

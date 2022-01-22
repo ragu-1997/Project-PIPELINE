@@ -1,9 +1,0 @@
-MARATHON_MASTER={{ mesos_zookeeper_masters }}
-MARATHON_ZK={{ marathon_zookeeper_state }}
-MARATHON_HOSTNAME={{ marathon_hostname }}
-MARATHON_HTTP_PORT={{ marathon_port }}
-{% if marathon_mesos_role %}MARATHON_MESOS_ROLE={{ marathon_mesos_role }}{% endif %}
-
-{% for var in marathon_env_vars %}
-{{ var }}
-{% endfor %}

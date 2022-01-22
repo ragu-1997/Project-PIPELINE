@@ -1,4 +1,0 @@
----
-dependencies:
-  - role: confluent.variables
-  - role: handlers

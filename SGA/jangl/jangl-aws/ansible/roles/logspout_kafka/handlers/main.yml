@@ -1,5 +1,0 @@
----
-- name: restart logspout
-  service:
-    name: "{{logspout_service_name}}"
-    state: restarted

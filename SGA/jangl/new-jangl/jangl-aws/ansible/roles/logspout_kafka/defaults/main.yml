@@ -1,5 +1,0 @@
----
-logspout_service_name: logspout
-logspout_port: 8765
-logspout_conf_dir: /etc/logspout
-logspout_docker_image: docker.jangl.com/logspout-kafka_avro:0.3

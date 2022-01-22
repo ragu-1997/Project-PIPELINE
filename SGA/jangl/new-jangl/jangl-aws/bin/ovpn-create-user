@@ -1,5 +1,0 @@
-#!/bin/sh
-set -e
-set -x
-
-ssh -t -i ssh/aws-key "centos@$(terraform output -state=terraform/terraform.tfstate vpn.public_ip)" docker run --volumes-from ovpn-data --log-driver=none --dns 8.8.8.8 --rm docker.jangl.com/openvpn ovpn_create_user "${1}"

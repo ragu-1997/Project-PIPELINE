@@ -1,8 +1,0 @@
----
-- hosts: windows
-  tasks:
- 
-    - name: Stop iis assetmanagement service
-      win_iis_website:
-        name: AssetManagement
-        state: stopped

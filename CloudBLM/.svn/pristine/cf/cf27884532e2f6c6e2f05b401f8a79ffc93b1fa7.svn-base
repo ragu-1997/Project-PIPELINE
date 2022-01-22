@@ -1,8 +1,0 @@
----
-- hosts: windows
-  tasks:
- 
-    - name: Start iis PDF Service
-      win_iis_website:
-        name: PDFViewer
-        state: started

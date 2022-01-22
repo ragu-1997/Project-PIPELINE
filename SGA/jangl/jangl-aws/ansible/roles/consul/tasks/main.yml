@@ -1,6 +1,0 @@
----
-
-- include: consul.yml
-  tags: ["consul"]
-
-- meta: flush_handlers

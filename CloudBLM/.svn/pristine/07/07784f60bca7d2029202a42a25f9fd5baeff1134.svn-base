@@ -1,8 +1,0 @@
----
-- hosts: windows
-  tasks:
- 
-    - name: Start iis GlobalAsset Service
-      win_iis_website:
-        name: GlobalAssetManagement
-        state: started

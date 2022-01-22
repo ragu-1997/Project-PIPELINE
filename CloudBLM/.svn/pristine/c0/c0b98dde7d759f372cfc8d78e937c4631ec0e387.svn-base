@@ -1,8 +1,0 @@
----
-- hosts: windows
-  tasks:
- 
-    - name: Stop iis Permission Service
-      win_iis_website:
-        name: PermissionService
-        state: stopped

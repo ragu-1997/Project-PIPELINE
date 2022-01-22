@@ -1,5 +1,0 @@
----
-pgbouncer_consul_service_name: pgbouncer-consul
-pgbouncer_consul_docker_image: docker.jangl.com/pgbouncer-consul:0.19.0
-pgbouncer_consul_dir: /etc/pgbouncer
-pgbouncer_consul_port: 5432

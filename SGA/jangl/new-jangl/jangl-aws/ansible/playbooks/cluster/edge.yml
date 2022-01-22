@@ -1,9 +1,0 @@
----
-- hosts: tag_Service_edge
-  become: yes
-  roles:
-    - consul
-    - dnsmasq
-    - docker
-    - nginx
-    - nginx_external

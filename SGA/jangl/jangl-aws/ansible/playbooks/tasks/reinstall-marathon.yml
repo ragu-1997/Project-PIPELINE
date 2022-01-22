@@ -1,8 +1,0 @@
----
-
-- hosts: tag_Service_controller
-  become: yes
-  serial: 1
-  roles:
-    - marathon_remove
-    - marathon

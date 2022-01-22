@@ -1,5 +1,0 @@
----
-dependencies:
-  - { role: ebs, letter: b}
-  - { role: ebs, letter: c}
-  - { role: ebs, letter: d}

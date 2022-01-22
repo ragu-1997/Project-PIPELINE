@@ -1,9 +1,0 @@
----
-users: []
-  # - name: example_user
-  #   enabled: True    # Setting to False deletes the user
-  #   public_keys:
-  #     - "ecdsa-sha2-nistp256 =PUBLIC_KEY_HERE= example_user"
-
-  # To generate private/public key, run command:
-  #     ssh-keygen -t ecdsa

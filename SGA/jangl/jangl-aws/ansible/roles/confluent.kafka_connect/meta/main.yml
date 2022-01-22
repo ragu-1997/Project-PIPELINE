@@ -1,5 +1,0 @@
----
-dependencies:
-  - role: lvm
-  - role: confluent.variables
-  - role: handlers

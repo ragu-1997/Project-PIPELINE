@@ -1,8 +1,0 @@
----
-- name: Add pgbouncer repo
-  yum: name={{ pgbouncer_yum_repo }} state=present
-
-- name: "Install pgbouncer"
-  yum: pkg=pgbouncer state=latest
-  notify:
-    - restart pgbouncer

@@ -1,8 +1,0 @@
----
-- name: restart networkmanager
-  become: yes
-  command: systemctl restart NetworkManager
-
-- name: restart dnsmasq
-  become: yes
-  command: systemctl restart dnsmasq

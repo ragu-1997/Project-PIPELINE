@@ -1,8 +1,0 @@
----
-- hosts: windows
-  tasks:
- 
-    - name: Stop iis NWC Service
-      win_iis_website:
-        name: NWC-Siemens
-        state: stopped

@@ -1,6 +1,0 @@
----
-enable_crowdstrike: True
-
-crowdstrike_yum_file: "falcon-sensor-6.20.0-11707.el8.x86_64.rpm"
-crowdstrike_settings_cid: "BE3B1C0EA6DB4D11860B68FD5CF605CF-E2"
-crowdstrike_settings_tags: "{{ ec2_tag_Cluster }},{{ ec2_tag_Service }}"
