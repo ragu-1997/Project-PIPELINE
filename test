@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Hello') {
             steps {
-               checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'e4345a5c-c83e-433f-8578-dfbdb9484572', url: 'https://github.com/ragu-1997/test.git']]])
+               checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'e4345a5c-c83e-433f-8578-dfbdb9484572', url: 'https://github.com/ragu-1997/test/']]])
             }
         }
     }
