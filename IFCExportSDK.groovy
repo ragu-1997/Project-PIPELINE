@@ -28,8 +28,8 @@ stage('Remove obj')
 {
   //Remove the object file 
 
-               bat 'del /Q CloudBLM-IFCExport\\obj'
-               bat 'del /Q CloudBLM-IFCExport-BusinessLogic\\obj'
+        
+           
                bat 'del /Q CloudBLM-IFCExport-BusinessLogicInterface\\obj'
                bat 'del /Q CLoudBLM-IFCExport-Models\\obj'
                
